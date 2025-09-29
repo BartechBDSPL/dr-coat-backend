@@ -1,0 +1,29 @@
+# Ignore build output and logs
+node_modules/
+dist/
+logs/
+coverage/
+
+# Ignore compiled files
+*.log
+*.prn
+*.txt
+
+# Ignore config and system files
+web.config
+startup.vbs
+
+# Ignore test snapshots
+__snapshots__/
+
+# Ignore Excel and binary files
+*.xlsx
+*.xls
+
+# Ignore all files in prn-printer except .js
+src/prn-printer/*.prn
+src/prn-printer/*.txt
+
+# Ignore environment files
+.env
+.env.*
