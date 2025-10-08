@@ -11,18 +11,18 @@ import { authWithSession } from '../middleware/authWithSession.js';
 const router = express.Router();
 
 //User Master
-router.get('/all-user-master', authWithSession, UserMaster.getAllUserDetails);
-router.post('/insert-user-master', authWithSession, UserMaster.insertUserDetails);
-router.patch('/edit-user-master', authWithSession, UserMaster.updateUserDetails);
-router.get('/get-all-user-type', authWithSession, UserMaster.getAllUserTypeDD);
+router.get('/all-user-master', UserMaster.getAllUserDetails);
+router.post('/insert-user-master', UserMaster.insertUserDetails);
+router.patch('/edit-user-master', UserMaster.updateUserDetails);
+router.get('/get-all-user-type', UserMaster.getAllUserTypeDD);
 
 //Change Password
 router.post('/change-password', auth, ChangePassword.changePassword);
 
 //User Role Master
-router.post('/insert-user-role', authWithSession, UserRoleMaster.insertUserRole);
-router.patch('/update-user-role', authWithSession, UserRoleMaster.updateUserRoles);
-router.get('/get-all-user-role', authWithSession, UserRoleMaster.getAllUserType);
+router.post('/insert-user-role', UserRoleMaster.insertUserRole);
+router.patch('/update-user-role', UserRoleMaster.updateUserRoles);
+router.get('/get-all-user-role', UserRoleMaster.getAllUserType);
 
 //Android Access
 router.patch('/edit-hht-user', authWithSession, androidAccessController.editHHTRegisterStatus);

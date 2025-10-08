@@ -19,7 +19,7 @@ import sessionManager from './utils/sessionManager.js';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4001;
 
 export default app;
 

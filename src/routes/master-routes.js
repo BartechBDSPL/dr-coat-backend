@@ -12,6 +12,7 @@ import * as PrinterMasterController from '../controllers/masters/printerMaster.j
 import * as ExistingStockUpload from '../controllers/masters/exisiting-stock-upload.js';
 import * as TransporterMasterController from '../controllers/masters/transporterMaster.js';
 import { authWithSession } from '../middleware/authWithSession.js';
+import auth from '../middleware/authWithSession.js';
 const router = express.Router();
 
 // Company Master
@@ -31,6 +32,7 @@ router.get('/all-uom-details', authWithSession, UOMMaster.getAllUom);
 router.get('/all-uom-unit', authWithSession, UOMMaster.getAllUomUnits);
 router.post('/insert-uom-details', authWithSession, UOMMaster.insertUom);
 router.patch('/update-uom-details', authWithSession, UOMMaster.updateUom);
+router.post('/upload-uom-excel', authWithSession, UOMMaster.uploadUomExcel);
 
 //Warehouse Category Master
 router.post('/insert-warehouse-category', authWithSession, whCategoryMaster.insertWhCategory);
@@ -50,11 +52,7 @@ router.post('/insert-wh-location', authWithSession, WhLocationMaster.insertDetai
 router.patch('/update-wh-location', authWithSession, WhLocationMaster.updateDetails);
 router.post('/upload-wh-location-excel', authWithSession, WhLocationMaster.uploadWhLocationExcel);
 
-//Material Master
-router.get('/get-all-material-details', auth, MaterialMaster.getAllMaterialDetails);
-router.post('/insert-material-details', auth, MaterialMaster.insertMaterialDetails);
-router.patch('/update-material-details', auth, MaterialMaster.updateMaterialDetails);
-router.get('/get-all-plant-code', auth, MaterialMaster.getAllPlantCodes);
+
 
 
 // Existing Stock Upload

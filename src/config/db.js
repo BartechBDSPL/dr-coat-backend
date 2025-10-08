@@ -2,7 +2,7 @@ import sql from 'mssql/msnodesqlv8.js';
 
 const config = {
   server: '15.206.183.202',
-  database: 'BoilerPlate_WMS',
+  database: 'dr_coat_and_resin_wms',
   driver: 'msnodesqlv8',
   options: {
     trustedConnection: true,
