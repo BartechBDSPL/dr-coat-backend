@@ -74,12 +74,13 @@ class SessionManager {
     await this.refreshSessionTimeoutIfNeeded();
 
     const now = new Date();
+    
     this.cache.set(userId, {
       lastActivity: now,
       timeoutHours: this.sessionTimeoutHours,
     });
 
-    console.log(`Activity updated for user ${userId} at ${now.toISOString()}`);
+    // console.log(`Activity updated for user ${userId} at ${now.toISOString()}`);
   }
 
   isSessionValid(userId) {
@@ -130,8 +131,18 @@ class SessionManager {
   }
 
   removeUserSession(userId) {
-    this.cache.del(userId);
-    console.log(`Session removed for user ${userId}`);
+    const deleted = this.cache.del(userId);
+    if (deleted) {
+      console.log(`✅ Session removed for user ${userId}`);
+    } else {
+      console.log(`⚠️ No active session found for user ${userId}`);
+    }
+    return deleted;
+  }
+
+  // Force logout a user from all devices (clears their session)
+  forceLogoutUser(userId) {
+    return this.removeUserSession(userId);
   }
 
   // Get all active sessions (for debugging)
