@@ -10,7 +10,8 @@ import * as PalletMasterController from '../controllers/masters/palletMaster.js'
 import * as ShiftMasterController from '../controllers/masters/shiftMaster.js';
 import * as PrinterMasterController from '../controllers/masters/printerMaster.js';
 import * as ExistingStockUpload from '../controllers/masters/exisiting-stock-upload.js';
-import * as TransporterMasterController from '../controllers/masters/transporterMaster.js';
+import * as MaterialMasterController from '../controllers/masters/materialMaster.js';
+import * as ItemPackingMasterController from '../controllers/masters/itemPackingMaster.js';
 import { authWithSession } from '../middleware/authWithSession.js';
 import auth from '../middleware/authWithSession.js';
 const router = express.Router();
@@ -52,13 +53,6 @@ router.post('/insert-wh-location', authWithSession, WhLocationMaster.insertDetai
 router.patch('/update-wh-location', authWithSession, WhLocationMaster.updateDetails);
 router.post('/upload-wh-location-excel', authWithSession, WhLocationMaster.uploadWhLocationExcel);
 
-
-
-
-// Existing Stock Upload
-router.post('/upload-existing-stock', authWithSession, ExistingStockUpload.uploadStock);
-router.get('/get-all-existing-stock', authWithSession, ExistingStockUpload.getAllStockUploaded);
-
 //Line Master
 router.get('/get-all-line', authWithSession, lineMaster.getAllLineMaster);
 router.post('/insert-line', authWithSession, lineMaster.insertLineMaster);
@@ -83,9 +77,17 @@ router.post('/insert-shift', authWithSession, ShiftMasterController.insertShift)
 router.post('/update-shift', authWithSession, ShiftMasterController.updateShift);
 router.get('/get-all-shift', authWithSession, ShiftMasterController.getAllShift);
 
-// Transporter Master
-router.post('/insert-transporter', authWithSession, TransporterMasterController.insertTransporter);
-router.post('/update-transporter', authWithSession, TransporterMasterController.updateTransporter);
-router.get('/get-all-transporter', authWithSession, TransporterMasterController.getAllTransporters);
+// Material Master
+router.get('/material/all-details', authWithSession, MaterialMasterController.getAllMaterialDetails);
+router.post('/material/insert-details', authWithSession, MaterialMasterController.insertMaterialDetails);
+router.patch('/material/update-details', authWithSession, MaterialMasterController.updateMaterialDetails);
+router.post('/upload-material-excel', authWithSession, MaterialMasterController.uploadMaterialExcel);
+router.get('/material/check-unique-nos', authWithSession, MaterialMasterController.checkUniqueItemNos);
+router.get('/material/check-unique-packing-list', authWithSession, MaterialMasterController.checkUniquePackingList);
+
+// Item Packing Master
+router.get('/item-packing/all-details', authWithSession, ItemPackingMasterController.getAllItemPackingDetails);
+router.post('/item-packing/insert-details', authWithSession, ItemPackingMasterController.insertItemPackingDetails);
+router.patch('/item-packing/update-details', authWithSession, ItemPackingMasterController.updateItemPackingDetails);
 
 export default router;

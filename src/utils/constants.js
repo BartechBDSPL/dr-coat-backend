@@ -13,3 +13,7 @@ export const SAP_SERVER = {
   Password: 'GmUx+51r',
   Language: 'EN',
 };
+
+export const ODATA_BASE_URL = 'http://4.240.12.26:2102';
+export const ODATA_USERNAME = 'CRM.2';
+export const ODATA_PASSWORD = 'Admin@2025';

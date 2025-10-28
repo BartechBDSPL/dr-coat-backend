@@ -28,13 +28,16 @@ export const getAllUomUnits = async (req, res) => {
 export const updateUom = async (req, res) => {
   const { id, uom_code, description, international_standard_code, user } = req.body;
   try {
-    const updateDetails = await executeQuery('EXEC sp_uom_master_update @id, @uom_code, @description, @international_standard_code, @updated_by', [
-      { name: 'id', type: sql.Int, value: id },
-      { name: 'uom_code', type: sql.NVarChar, value: uom_code },
-      { name: 'description', type: sql.NVarChar, value: description },
-      { name: 'international_standard_code', type: sql.NVarChar, value: international_standard_code },
-      { name: 'updated_by', type: sql.NVarChar, value: user },
-    ]);
+    const updateDetails = await executeQuery(
+      'EXEC sp_uom_master_update @id, @uom_code, @description, @international_standard_code, @updated_by',
+      [
+        { name: 'id', type: sql.Int, value: id },
+        { name: 'uom_code', type: sql.NVarChar, value: uom_code },
+        { name: 'description', type: sql.NVarChar, value: description },
+        { name: 'international_standard_code', type: sql.NVarChar, value: international_standard_code },
+        { name: 'updated_by', type: sql.NVarChar, value: user },
+      ]
+    );
 
     const { Status, Message } = updateDetails[0];
 
@@ -48,12 +51,15 @@ export const updateUom = async (req, res) => {
 export const insertUom = async (req, res) => {
   const { uom_code, description, international_standard_code, user } = req.body;
   try {
-    const insertDetails = await executeQuery('EXEC sp_uom_master_insert @uom_code, @description, @international_standard_code, @created_by', [
-      { name: 'uom_code', type: sql.NVarChar, value: uom_code },
-      { name: 'description', type: sql.NVarChar, value: description },
-      { name: 'international_standard_code', type: sql.NVarChar, value: international_standard_code },
-      { name: 'created_by', type: sql.NVarChar, value: user },
-    ]);
+    const insertDetails = await executeQuery(
+      'EXEC sp_uom_master_insert @uom_code, @description, @international_standard_code, @created_by',
+      [
+        { name: 'uom_code', type: sql.NVarChar, value: uom_code },
+        { name: 'description', type: sql.NVarChar, value: description },
+        { name: 'international_standard_code', type: sql.NVarChar, value: international_standard_code },
+        { name: 'created_by', type: sql.NVarChar, value: user },
+      ]
+    );
 
     const { Status, Message } = insertDetails[0];
 
@@ -100,7 +106,10 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-}).single('excelFile');
+}).fields([
+  { name: 'excelFile', maxCount: 1 },
+  { name: 'username', maxCount: 1 },
+]);
 
 // Function to upload and process Excel file
 export const uploadUomExcel = async (req, res) => {
@@ -140,11 +149,7 @@ export const uploadUomExcel = async (req, res) => {
         }
 
         // Check if required headers exist
-        const requiredHeaders = [
-          'Code',
-          'Description',
-          'International Standard Code',
-        ];
+        const requiredHeaders = ['Code', 'Description', 'International Standard Code'];
 
         const fileHeaders = Object.keys(data[0]);
         const missingHeaders = requiredHeaders.filter(header => !fileHeaders.includes(header));
@@ -163,7 +168,7 @@ export const uploadUomExcel = async (req, res) => {
           failure: [],
         };
 
-        const username = req.body.username;
+        const username = req.body.username || req.user?.UserName;
 
         // Function to split array into chunks
         const chunkArray = (array, chunkSize) => {

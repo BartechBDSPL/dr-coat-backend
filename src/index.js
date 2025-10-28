@@ -58,7 +58,7 @@ app.use('/', (req, res) => {
 async function startServer() {
   try {
     await initializeDatabases();
-    
+
     // Initialize session manager after database is ready
     console.log('🔧 Initializing session manager...');
     try {

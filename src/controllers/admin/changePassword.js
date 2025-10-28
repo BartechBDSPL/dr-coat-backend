@@ -1,7 +1,3 @@
-import { executeQuery } from '../../config/db.js';
-import { sql } from '../../config/db.js';
-import { encryptPassword } from '../../utils/passswordHelper.js';
-
 // export const changePassword = async (req, res) => {
 //   const { user_id, old_user_password, new_user_password, is_first_change } = req.body;
 //   try {
@@ -32,13 +28,11 @@ import { encryptPassword } from '../../utils/passswordHelper.js';
 //   }
 // };
 
-
-
 export const changePassword = async (req, res) => {
   const { user_id, old_user_password, new_user_password, is_first_change } = req.body;
   try {
     // Dummy 440 status for testing
-    res.status(440).json({ Status:'T',Message: "Dummy 440 status for testing", status: 440 });
+    res.status(440).json({ Status: 'T', Message: 'Dummy 440 status for testing', status: 440 });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

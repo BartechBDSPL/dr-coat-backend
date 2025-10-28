@@ -97,7 +97,10 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-}).single('excelFile');
+}).fields([
+  { name: 'excelFile', maxCount: 1 },
+  { name: 'username', maxCount: 1 },
+]);
 
 // Function to upload and process Excel file
 export const uploadWhLocationExcel = async (req, res) => {
@@ -161,7 +164,7 @@ export const uploadWhLocationExcel = async (req, res) => {
           failure: [],
         };
 
-        const username = req.user.UserName;
+        const username = req.body.username || req.user.UserName;
 
         // Function to split array into chunks
         const chunkArray = (array, chunkSize) => {
