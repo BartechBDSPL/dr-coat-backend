@@ -9,11 +9,9 @@ import * as WhLocationMaster from '../controllers/masters/whLocationMaster.js';
 import * as PalletMasterController from '../controllers/masters/palletMaster.js';
 import * as ShiftMasterController from '../controllers/masters/shiftMaster.js';
 import * as PrinterMasterController from '../controllers/masters/printerMaster.js';
-import * as ExistingStockUpload from '../controllers/masters/exisiting-stock-upload.js';
 import * as MaterialMasterController from '../controllers/masters/materialMaster.js';
 import * as ItemPackingMasterController from '../controllers/masters/itemPackingMaster.js';
 import { authWithSession } from '../middleware/authWithSession.js';
-import auth from '../middleware/authWithSession.js';
 const router = express.Router();
 
 // Company Master

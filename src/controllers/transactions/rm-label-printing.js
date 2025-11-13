@@ -1,4 +1,4 @@
-import { executeQuery, sql } from "../../config/db.js";
+import { executeQuery, sql } from '../../config/db.js';
 import axios from 'axios';
 import { ODATA_BASE_URL, ODATA_USERNAME, ODATA_PASSWORD } from '../../utils/constants.js';
 
@@ -7,10 +7,10 @@ export const getGRNDetails = async (req, res) => {
 
   try {
     const result = await executeQuery('EXEC sp_grn_get_details @grn_no', [
-      { name: 'grn_no', type: sql.NVarChar, value: grn_no }
+      { name: 'grn_no', type: sql.NVarChar, value: grn_no },
     ]);
 
-    if (result[0].Status === "F" && result[0].Message.includes("GRN does not")) {
+    if (result[0].Status === 'F' && result[0].Message.includes('GRN does not')) {
       // Fetch from OData
       const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC%20UAT%2005032024')/GRNWMS?$filter=GRNNo eq '${grn_no}'`;
       const odataResponse = await axios.get(url, {
@@ -52,7 +52,7 @@ export const getGRNDetails = async (req, res) => {
 
       // Refetch
       const updatedResult = await executeQuery('EXEC sp_grn_get_details @grn_no', [
-        { name: 'grn_no', type: sql.NVarChar, value: grn_no }
+        { name: 'grn_no', type: sql.NVarChar, value: grn_no },
       ]);
 
       res.status(200).json(updatedResult[0]);
@@ -64,7 +64,6 @@ export const getGRNDetails = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 export const checkSalesOrderUniqueNumber = async (req, res) => {
   try {
@@ -95,7 +94,6 @@ export const checkSalesOrderUniqueNumber = async (req, res) => {
   }
 };
 
-
 export const checkSalesOrderLineUniqueNumber = async (req, res) => {
   try {
     const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company(%27DRC UAT 05032024%27)/SalesOrdersLineWMS`;
@@ -124,6 +122,3 @@ export const checkSalesOrderLineUniqueNumber = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-

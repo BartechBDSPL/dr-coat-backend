@@ -26,11 +26,14 @@ export const updateMaterialReturn = async (req, res) => {
     }
 
     for (let i = 0; i < serialNos.length; i++) {
-      const result = await executeQuery(`EXEC [dbo].[fg_hht_material_return_update] @shipment_no, @serial_no, @return_by`, [
-        { name: 'shipment_no', type: sql.NVarChar(50), value: shipmentNos[i] },
-        { name: 'serial_no', type: sql.NVarChar(255), value: serialNos[i] },
-        { name: 'return_by', type: sql.NVarChar(50), value: return_by },
-      ]);
+      const result = await executeQuery(
+        `EXEC [dbo].[fg_hht_material_return_update] @shipment_no, @serial_no, @return_by`,
+        [
+          { name: 'shipment_no', type: sql.NVarChar(50), value: shipmentNos[i] },
+          { name: 'serial_no', type: sql.NVarChar(255), value: serialNos[i] },
+          { name: 'return_by', type: sql.NVarChar(50), value: return_by },
+        ]
+      );
 
       if (result[0].Status === 'F') {
         return res.json(result[0]);

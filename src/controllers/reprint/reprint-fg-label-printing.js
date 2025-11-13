@@ -259,14 +259,17 @@ export const getReprintFgLabelDetails = async (req, res) => {
   const { production_order_no, item_code, item_description, lot_no, from_date, to_date } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_reprint_fg_label_get_details] @production_order_no, @item_code, @item_description, @lot_no, @from_date, @to_date`, [
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no || null },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code || null },
-      { name: 'item_description', type: sql.NVarChar(200), value: item_description || null },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no || null },
-      { name: 'from_date', type: sql.NVarChar(10), value: from_date || null },
-      { name: 'to_date', type: sql.NVarChar(10), value: to_date || null },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_reprint_fg_label_get_details] @production_order_no, @item_code, @item_description, @lot_no, @from_date, @to_date`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no || null },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code || null },
+        { name: 'item_description', type: sql.NVarChar(200), value: item_description || null },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no || null },
+        { name: 'from_date', type: sql.NVarChar(10), value: from_date || null },
+        { name: 'to_date', type: sql.NVarChar(10), value: to_date || null },
+      ]
+    );
     res.json(result);
   } catch (error) {
     console.error('Error getting reprint FG label details:', error);
@@ -275,24 +278,41 @@ export const getReprintFgLabelDetails = async (req, res) => {
 };
 
 export const insertReprintFgLabel = async (req, res) => {
-  const { production_order_no, item_code, item_description, lot_no, customer_no, customer_name, finished_quantity, uom, quantity, serial_no, print_quantity, reprint_by, reprint_reason } = req.body;
+  const {
+    production_order_no,
+    item_code,
+    item_description,
+    lot_no,
+    customer_no,
+    customer_name,
+    finished_quantity,
+    uom,
+    quantity,
+    serial_no,
+    print_quantity,
+    reprint_by,
+    reprint_reason,
+  } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_reprint_fg_label_insert] @production_order_no, @item_code, @item_description, @lot_no, @customer_no, @customer_name, @finished_quantity, @uom, @quantity, @serial_no, @print_quantity, @reprint_by, @reprint_reason`, [
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'item_description', type: sql.NVarChar(200), value: item_description },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'customer_no', type: sql.NVarChar(50), value: customer_no },
-      { name: 'customer_name', type: sql.NVarChar(200), value: customer_name },
-      { name: 'finished_quantity', type: sql.Decimal(18, 3), value: finished_quantity },
-      { name: 'uom', type: sql.NVarChar(10), value: uom },
-      { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
-      { name: 'serial_no', type: sql.NVarChar(255), value: serial_no },
-      { name: 'print_quantity', type: sql.Decimal(18, 3), value: print_quantity },
-      { name: 'reprint_by', type: sql.NVarChar(50), value: reprint_by },
-      { name: 'reprint_reason', type: sql.NVarChar(200), value: reprint_reason },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_reprint_fg_label_insert] @production_order_no, @item_code, @item_description, @lot_no, @customer_no, @customer_name, @finished_quantity, @uom, @quantity, @serial_no, @print_quantity, @reprint_by, @reprint_reason`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'item_description', type: sql.NVarChar(200), value: item_description },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'customer_no', type: sql.NVarChar(50), value: customer_no },
+        { name: 'customer_name', type: sql.NVarChar(200), value: customer_name },
+        { name: 'finished_quantity', type: sql.Decimal(18, 3), value: finished_quantity },
+        { name: 'uom', type: sql.NVarChar(10), value: uom },
+        { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
+        { name: 'serial_no', type: sql.NVarChar(255), value: serial_no },
+        { name: 'print_quantity', type: sql.Decimal(18, 3), value: print_quantity },
+        { name: 'reprint_by', type: sql.NVarChar(50), value: reprint_by },
+        { name: 'reprint_reason', type: sql.NVarChar(200), value: reprint_reason },
+      ]
+    );
     res.json(result[0]);
   } catch (error) {
     console.error('Error inserting reprint FG label:', error);

@@ -1,4 +1,4 @@
-import { executeQuery, sql } from "../../config/db.js";
+import { executeQuery, sql } from '../../config/db.js';
 import axios from 'axios';
 import { ODATA_BASE_URL, ODATA_USERNAME, ODATA_PASSWORD } from '../../utils/constants.js';
 import fs from 'fs';
@@ -163,32 +163,35 @@ export const upsertProductionOrder = async (req, res) => {
     sub_contractor_code,
     entry_no,
     lot_no,
-    created_by
+    created_by,
   } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_production_order_upsert] @qc_status, @production_order_no, @line_no, @item_code, @item_description, @quantity, @customer_no, @customer_name, @due_date, @location_code, @starting_date, @ending_date, @uom_code, @remaining_quantity, @finished_quantity, @sub_contracting_order_no, @sub_contractor_code, @entry_no, @lot_no, @created_by`, [
-      { name: 'qc_status', type: sql.NVarChar(50), value: qc_status },
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-      { name: 'line_no', type: sql.NVarChar(20), value: line_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'item_description', type: sql.NVarChar(200), value: item_description },
-      { name: 'quantity', type: sql.Decimal(18,3), value: quantity },
-      { name: 'customer_no', type: sql.NVarChar(50), value: customer_no },
-      { name: 'customer_name', type: sql.NVarChar(200), value: customer_name },
-      { name: 'due_date', type: sql.NVarChar(10), value: due_date },
-      { name: 'location_code', type: sql.NVarChar(10), value: location_code },
-      { name: 'starting_date', type: sql.NVarChar(10), value: starting_date },
-      { name: 'ending_date', type: sql.NVarChar(10), value: ending_date },
-      { name: 'uom_code', type: sql.NVarChar(10), value: uom_code },
-      { name: 'remaining_quantity', type: sql.Decimal(18,3), value: remaining_quantity },
-      { name: 'finished_quantity', type: sql.Decimal(18,3), value: finished_quantity },
-      { name: 'sub_contracting_order_no', type: sql.NVarChar(50), value: sub_contracting_order_no },
-      { name: 'sub_contractor_code', type: sql.NVarChar(50), value: sub_contractor_code },
-      { name: 'entry_no', type: sql.NVarChar(50), value: entry_no },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'created_by', type: sql.NVarChar(50), value: created_by },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_production_order_upsert] @qc_status, @production_order_no, @line_no, @item_code, @item_description, @quantity, @customer_no, @customer_name, @due_date, @location_code, @starting_date, @ending_date, @uom_code, @remaining_quantity, @finished_quantity, @sub_contracting_order_no, @sub_contractor_code, @entry_no, @lot_no, @created_by`,
+      [
+        { name: 'qc_status', type: sql.NVarChar(50), value: qc_status },
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'line_no', type: sql.NVarChar(20), value: line_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'item_description', type: sql.NVarChar(200), value: item_description },
+        { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
+        { name: 'customer_no', type: sql.NVarChar(50), value: customer_no },
+        { name: 'customer_name', type: sql.NVarChar(200), value: customer_name },
+        { name: 'due_date', type: sql.NVarChar(10), value: due_date },
+        { name: 'location_code', type: sql.NVarChar(10), value: location_code },
+        { name: 'starting_date', type: sql.NVarChar(10), value: starting_date },
+        { name: 'ending_date', type: sql.NVarChar(10), value: ending_date },
+        { name: 'uom_code', type: sql.NVarChar(10), value: uom_code },
+        { name: 'remaining_quantity', type: sql.Decimal(18, 3), value: remaining_quantity },
+        { name: 'finished_quantity', type: sql.Decimal(18, 3), value: finished_quantity },
+        { name: 'sub_contracting_order_no', type: sql.NVarChar(50), value: sub_contracting_order_no },
+        { name: 'sub_contractor_code', type: sql.NVarChar(50), value: sub_contractor_code },
+        { name: 'entry_no', type: sql.NVarChar(50), value: entry_no },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'created_by', type: sql.NVarChar(50), value: created_by },
+      ]
+    );
     res.json(result);
   } catch (error) {
     console.error('Error upserting production order:', error);
@@ -248,28 +251,31 @@ export const getProductionOrderDetails = async (req, res) => {
     const lotItem = lotData[0];
 
     // Call upsert with ERP data
-    await executeQuery(`EXEC [dbo].[sp_production_order_upsert] @qc_status, @production_order_no, @line_no, @item_code, @item_description, @quantity, @customer_no, @customer_name, @due_date, @location_code, @starting_date, @ending_date, @uom_code, @remaining_quantity, @finished_quantity, @sub_contracting_order_no, @sub_contractor_code, @entry_no, @lot_no, @created_by`, [
-      { name: 'qc_status', type: sql.NVarChar(50), value: item.Status },
-      { name: 'production_order_no', type: sql.NVarChar(50), value: item.Prod_Order_No },
-      { name: 'line_no', type: sql.NVarChar(20), value: item.Line_No.toString() },
-      { name: 'item_code', type: sql.NVarChar(50), value: item.Item_No },
-      { name: 'item_description', type: sql.NVarChar(200), value: item.Description },
-      { name: 'quantity', type: sql.Decimal(18,3), value: item.Quantity },
-      { name: 'customer_no', type: sql.NVarChar(50), value: item.CustomerNo },
-      { name: 'customer_name', type: sql.NVarChar(200), value: item.CustomerName },
-      { name: 'due_date', type: sql.NVarChar(10), value: item.Due_Date },
-      { name: 'location_code', type: sql.NVarChar(10), value: item.Location_Code },
-      { name: 'starting_date', type: sql.NVarChar(10), value: item.Starting_Date },
-      { name: 'ending_date', type: sql.NVarChar(10), value: item.Ending_Date },
-      { name: 'uom_code', type: sql.NVarChar(10), value: item.Unit_of_Measure_Code },
-      { name: 'remaining_quantity', type: sql.Decimal(18,3), value: item.Remaining_Quantity },
-      { name: 'finished_quantity', type: sql.Decimal(18,3), value: item.Finished_Quantity },
-      { name: 'sub_contracting_order_no', type: sql.NVarChar(50), value: item.Subcontracting_Order_No },
-      { name: 'sub_contractor_code', type: sql.NVarChar(50), value: item.Subcontractor_Code },
-      { name: 'entry_no', type: sql.NVarChar(50), value: lotItem.Entry_No ? lotItem.Entry_No.toString() : '' },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lotItem.lotNo || '' },
-      { name: 'created_by', type: sql.NVarChar(50), value: created_by }, // Default
-    ]);
+    await executeQuery(
+      `EXEC [dbo].[sp_production_order_upsert] @qc_status, @production_order_no, @line_no, @item_code, @item_description, @quantity, @customer_no, @customer_name, @due_date, @location_code, @starting_date, @ending_date, @uom_code, @remaining_quantity, @finished_quantity, @sub_contracting_order_no, @sub_contractor_code, @entry_no, @lot_no, @created_by`,
+      [
+        { name: 'qc_status', type: sql.NVarChar(50), value: item.Status },
+        { name: 'production_order_no', type: sql.NVarChar(50), value: item.Prod_Order_No },
+        { name: 'line_no', type: sql.NVarChar(20), value: item.Line_No.toString() },
+        { name: 'item_code', type: sql.NVarChar(50), value: item.Item_No },
+        { name: 'item_description', type: sql.NVarChar(200), value: item.Description },
+        { name: 'quantity', type: sql.Decimal(18, 3), value: item.Quantity },
+        { name: 'customer_no', type: sql.NVarChar(50), value: item.CustomerNo },
+        { name: 'customer_name', type: sql.NVarChar(200), value: item.CustomerName },
+        { name: 'due_date', type: sql.NVarChar(10), value: item.Due_Date },
+        { name: 'location_code', type: sql.NVarChar(10), value: item.Location_Code },
+        { name: 'starting_date', type: sql.NVarChar(10), value: item.Starting_Date },
+        { name: 'ending_date', type: sql.NVarChar(10), value: item.Ending_Date },
+        { name: 'uom_code', type: sql.NVarChar(10), value: item.Unit_of_Measure_Code },
+        { name: 'remaining_quantity', type: sql.Decimal(18, 3), value: item.Remaining_Quantity },
+        { name: 'finished_quantity', type: sql.Decimal(18, 3), value: item.Finished_Quantity },
+        { name: 'sub_contracting_order_no', type: sql.NVarChar(50), value: item.Subcontracting_Order_No },
+        { name: 'sub_contractor_code', type: sql.NVarChar(50), value: item.Subcontractor_Code },
+        { name: 'entry_no', type: sql.NVarChar(50), value: lotItem.Entry_No ? lotItem.Entry_No.toString() : '' },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lotItem.lotNo || '' },
+        { name: 'created_by', type: sql.NVarChar(50), value: created_by }, // Default
+      ]
+    );
 
     // Now get details again
     result = await executeQuery(`EXEC [dbo].[sp_production_order_get_details] @production_order_no`, [
@@ -301,7 +307,7 @@ export const getRecentProductionOrders = async (req, res) => {
   }
 };
 
-export const updateProductionOrderOpenTime = async (production_order_no) => {
+export const updateProductionOrderOpenTime = async production_order_no => {
   try {
     await executeQuery(`EXEC [dbo].[sp_production_order_no_open_time_update] @production_order_no`, [
       { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
@@ -313,16 +319,18 @@ export const updateProductionOrderOpenTime = async (production_order_no) => {
   }
 };
 
-
 export const findSrNo = async (req, res) => {
   const { production_order_no, item_code, lot_no } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_fg_label_sr_no_find_sr_no] @production_order_no, @item_code, @lot_no`, [
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_fg_label_sr_no_find_sr_no] @production_order_no, @item_code, @lot_no`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+      ]
+    );
     res.json(result[0]);
   } catch (error) {
     console.error('Error finding SR number:', error);
@@ -334,13 +342,16 @@ export const updateProductionOrderLabelCount = async (req, res) => {
   const { production_order_no, item_code, lot_no, printed_label, remaining_label } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_production_order_label_count_update] @production_order_no, @item_code, @lot_no, @printed_label, @remaining_label`, [
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'printed_label', type: sql.Int, value: printed_label },
-      { name: 'remaining_label', type: sql.Int, value: remaining_label },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_production_order_label_count_update] @production_order_no, @item_code, @lot_no, @printed_label, @remaining_label`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'printed_label', type: sql.Int, value: printed_label },
+        { name: 'remaining_label', type: sql.Int, value: remaining_label },
+      ]
+    );
     res.json(result);
   } catch (error) {
     console.error('Error updating production order label count:', error);
@@ -367,7 +378,7 @@ export const insertFgLabelPrinting = async (req, res) => {
     printed_qty,
     remaining_qty,
     printer_ip,
-    dpi
+    dpi,
   } = req.body;
   console.log(req.body);
   try {
@@ -381,22 +392,25 @@ export const insertFgLabelPrinting = async (req, res) => {
     const results = [];
 
     for (let i = 0; i < serialNos.length; i++) {
-      const result = await executeQuery(`EXEC [dbo].[sp_fg_label_printing_insert] @production_order_no, @item_code, @item_description, @lot_no, @customer_no, @customer_name, @finished_quantity, @uom, @quantity, @serial_no, @print_by, @print_quantity, @mfg_date, @exp_date`, [
-        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-        { name: 'item_description', type: sql.NVarChar(200), value: item_description },
-        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-        { name: 'customer_no', type: sql.NVarChar(50), value: customer_no },
-        { name: 'customer_name', type: sql.NVarChar(200), value: customer_name },
-        { name: 'finished_quantity', type: sql.Decimal(18,3), value: finished_quantity },
-        { name: 'uom', type: sql.NVarChar(10), value: uom },
-        { name: 'quantity', type: sql.Decimal(18,3), value: quantity },
-        { name: 'serial_no', type: sql.NVarChar(255), value: serialNos[i] },
-        { name: 'print_by', type: sql.NVarChar(50), value: print_by },
-        { name: 'print_quantity', type: sql.Decimal(18,3), value: parseFloat(printQuantities[i]) },
-        { name: 'mfg_date', type: sql.DateTime, value: mfg_date },
-        { name: 'exp_date', type: sql.DateTime, value: exp_date },
-      ]);
+      const result = await executeQuery(
+        `EXEC [dbo].[sp_fg_label_printing_insert] @production_order_no, @item_code, @item_description, @lot_no, @customer_no, @customer_name, @finished_quantity, @uom, @quantity, @serial_no, @print_by, @print_quantity, @mfg_date, @exp_date`,
+        [
+          { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+          { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+          { name: 'item_description', type: sql.NVarChar(200), value: item_description },
+          { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+          { name: 'customer_no', type: sql.NVarChar(50), value: customer_no },
+          { name: 'customer_name', type: sql.NVarChar(200), value: customer_name },
+          { name: 'finished_quantity', type: sql.Decimal(18, 3), value: finished_quantity },
+          { name: 'uom', type: sql.NVarChar(10), value: uom },
+          { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
+          { name: 'serial_no', type: sql.NVarChar(255), value: serialNos[i] },
+          { name: 'print_by', type: sql.NVarChar(50), value: print_by },
+          { name: 'print_quantity', type: sql.Decimal(18, 3), value: parseFloat(printQuantities[i]) },
+          { name: 'mfg_date', type: sql.DateTime, value: mfg_date },
+          { name: 'exp_date', type: sql.DateTime, value: exp_date },
+        ]
+      );
 
       if (result[0].Status === 'F') {
         return res.json(result[0]);
@@ -406,12 +420,15 @@ export const insertFgLabelPrinting = async (req, res) => {
     }
 
     // Call the upsert procedure after all inserts are completed
-    const upsertResult = await executeQuery(`EXEC [dbo].[sp_fg_label_sr_no_upsert] @production_order_no, @item_code, @lot_no, @generated_sr_no`, [
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'generated_sr_no', type: sql.Int, value: serialNos.length },
-    ]);
+    const upsertResult = await executeQuery(
+      `EXEC [dbo].[sp_fg_label_sr_no_upsert] @production_order_no, @item_code, @lot_no, @generated_sr_no`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'generated_sr_no', type: sql.Int, value: serialNos.length },
+      ]
+    );
 
     if (upsertResult[0].Status !== 'T') {
       return res.status(500).json({ error: 'Failed to update SR number' });
@@ -422,16 +439,19 @@ export const insertFgLabelPrinting = async (req, res) => {
       { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
       { name: 'item_code', type: sql.NVarChar(50), value: item_code },
       { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'printed_qty', type: sql.Decimal(18,3), value: printed_qty },
-      { name: 'remaining_qty', type: sql.Decimal(18,3), value: remaining_qty },
+      { name: 'printed_qty', type: sql.Decimal(18, 3), value: printed_qty },
+      { name: 'remaining_qty', type: sql.Decimal(18, 3), value: remaining_qty },
     ]);
-    const updateQtyResult = await executeQuery(`EXEC [dbo].[sp_production_order_label_qty_update] @production_order_no, @item_code, @lot_no, @printed_qty, @remaining_qty`, [
-      { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'printed_qty', type: sql.Decimal(18,3), value: printed_qty },
-      { name: 'remaining_qty', type: sql.Decimal(18,3), value: remaining_qty },
-    ]);
+    const updateQtyResult = await executeQuery(
+      `EXEC [dbo].[sp_production_order_label_qty_update] @production_order_no, @item_code, @lot_no, @printed_qty, @remaining_qty`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'printed_qty', type: sql.Decimal(18, 3), value: printed_qty },
+        { name: 'remaining_qty', type: sql.Decimal(18, 3), value: remaining_qty },
+      ]
+    );
 
     if (updateQtyResult[0].Status !== 'T') {
       return res.status(500).json({ error: updateQtyResult[0].Message || 'Failed to update label quantity' });

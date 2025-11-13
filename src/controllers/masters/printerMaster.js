@@ -17,7 +17,18 @@ export const getLineDataByPlant = async (req, res) => {
 };
 
 export const insertPrinter = async (req, res) => {
-  const { plant_code, printer_name, printer_sr_no, printer_ip, printer_make, asset_code, status, created_by, dpi, line_code } = req.body;
+  const {
+    plant_code,
+    printer_name,
+    printer_sr_no,
+    printer_ip,
+    printer_make,
+    asset_code,
+    status,
+    created_by,
+    dpi,
+    line_code,
+  } = req.body;
 
   try {
     const result = await executeQuery(

@@ -50,7 +50,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/sap-transaction', sapTransactionRoutes);
 
 app.use('/', (req, res) => {
-  res.send('Welcome to WMS Gerreishemer API');
+  res.send('Welcome to WMS DR Coat API');
 });
 
 async function startServer() {

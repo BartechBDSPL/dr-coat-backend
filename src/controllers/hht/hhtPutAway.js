@@ -1,7 +1,4 @@
 import { executeQuery, sql } from '../../config/db.js';
-import axios from 'axios';
-import { SAP_CONNECTOR_MIDDLEWARE_URL, SAP_SERVER } from '../../utils/constants.js';
-import { format } from 'date-fns';
 
 export const putAwayValidation = async (req, res) => {
   const { serial_no } = req.body;
@@ -26,13 +23,16 @@ export const putAwayUpdate = async (req, res) => {
     const results = [];
 
     for (let i = 0; i < serialNos.length; i++) {
-      const result = await executeQuery(`EXEC [dbo].[fg_hht_put_away_update] @warehouse_code, @put_location, @put_quantity, @serial_no, @put_by`, [
-        { name: 'warehouse_code', type: sql.NVarChar(50), value: warehouse_code },
-        { name: 'put_location', type: sql.NVarChar(20), value: put_location },
-        { name: 'put_quantity', type: sql.Decimal(18,3), value: parseFloat(quantities[i]) },
-        { name: 'serial_no', type: sql.NVarChar(255), value: serialNos[i] },
-        { name: 'put_by', type: sql.NVarChar(50), value: put_by },
-      ]);
+      const result = await executeQuery(
+        `EXEC [dbo].[fg_hht_put_away_update] @warehouse_code, @put_location, @put_quantity, @serial_no, @put_by`,
+        [
+          { name: 'warehouse_code', type: sql.NVarChar(50), value: warehouse_code },
+          { name: 'put_location', type: sql.NVarChar(20), value: put_location },
+          { name: 'put_quantity', type: sql.Decimal(18, 3), value: parseFloat(quantities[i]) },
+          { name: 'serial_no', type: sql.NVarChar(255), value: serialNos[i] },
+          { name: 'put_by', type: sql.NVarChar(50), value: put_by },
+        ]
+      );
       results.push(result[0]);
     }
     res.json(results[0]);
@@ -55,7 +55,6 @@ export const putAwayLocationSuggestion = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch location suggestions' });
   }
 };
-
 
 export const checkLocationExists = async (req, res) => {
   const { warehouse_code, bin } = req.body;

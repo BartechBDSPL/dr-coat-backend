@@ -25,14 +25,17 @@ export const getAllSerialNos = async (req, res) => {
 };
 
 export const updateMaterialReceipt = async (req, res) => {
-  const { stock_transfer_number, serial_no , material_receipt_by } = req.body;
+  const { stock_transfer_number, serial_no, material_receipt_by } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[hht_material_receipt_update] @stock_transfer_number, @serial_no, @material_receipt_by`, [
-      { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
-      { name: 'serial_no', type: sql.NVarChar(50), value: serial_no },
-      { name: 'material_receipt_by', type: sql.NVarChar(50), value: material_receipt_by }
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[hht_material_receipt_update] @stock_transfer_number, @serial_no, @material_receipt_by`,
+      [
+        { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
+        { name: 'serial_no', type: sql.NVarChar(50), value: serial_no },
+        { name: 'material_receipt_by', type: sql.NVarChar(50), value: material_receipt_by },
+      ]
+    );
     res.json(result);
   } catch (error) {
     console.error('Error updating material receipt:', error);

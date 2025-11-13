@@ -73,7 +73,7 @@ class SessionManager {
     await this.refreshSessionTimeoutIfNeeded();
 
     const now = new Date();
-    
+
     this.cache.set(userId, {
       lastActivity: now,
       timeoutHours: this.sessionTimeoutHours,

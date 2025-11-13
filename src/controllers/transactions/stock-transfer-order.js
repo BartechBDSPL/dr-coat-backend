@@ -17,26 +17,29 @@ export const insertStockTransferOrder = async (req, res) => {
     quantity_received,
     line_no,
     assign_user,
-    created_by
+    created_by,
   } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_stock_transfer_order_insert] @stock_transfer_number, @transfer_from_code, @transfer_to_code, @posting_date, @item_code, @lot_no, @quantity, @packing_details, @item_description, @quantity_shipped, @quantity_received, @line_no, @assign_user, @created_by`, [
-      { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
-      { name: 'transfer_from_code', type: sql.NVarChar(50), value: transfer_from_code },
-      { name: 'transfer_to_code', type: sql.NVarChar(50), value: transfer_to_code },
-      { name: 'posting_date', type: sql.NVarChar(15), value: posting_date },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'quantity', type: sql.Decimal(18,3), value: quantity },
-      { name: 'packing_details', type: sql.NVarChar(50), value: packing_details },
-      { name: 'item_description', type: sql.NVarChar(100), value: item_description },
-      { name: 'quantity_shipped', type: sql.Decimal(18,3), value: quantity_shipped },
-      { name: 'quantity_received', type: sql.Decimal(18,3), value: quantity_received },
-      { name: 'line_no', type: sql.NVarChar(10), value: line_no },
-      { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
-      { name: 'created_by', type: sql.NVarChar(50), value: created_by },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_stock_transfer_order_insert] @stock_transfer_number, @transfer_from_code, @transfer_to_code, @posting_date, @item_code, @lot_no, @quantity, @packing_details, @item_description, @quantity_shipped, @quantity_received, @line_no, @assign_user, @created_by`,
+      [
+        { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
+        { name: 'transfer_from_code', type: sql.NVarChar(50), value: transfer_from_code },
+        { name: 'transfer_to_code', type: sql.NVarChar(50), value: transfer_to_code },
+        { name: 'posting_date', type: sql.NVarChar(15), value: posting_date },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
+        { name: 'packing_details', type: sql.NVarChar(50), value: packing_details },
+        { name: 'item_description', type: sql.NVarChar(100), value: item_description },
+        { name: 'quantity_shipped', type: sql.Decimal(18, 3), value: quantity_shipped },
+        { name: 'quantity_received', type: sql.Decimal(18, 3), value: quantity_received },
+        { name: 'line_no', type: sql.NVarChar(10), value: line_no },
+        { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
+        { name: 'created_by', type: sql.NVarChar(50), value: created_by },
+      ]
+    );
     res.json(result[0]);
   } catch (error) {
     console.error('Error inserting stock transfer order:', error);
@@ -48,12 +51,15 @@ export const assignUserToStockTransferOrder = async (req, res) => {
   const { id, stock_transfer_number, assign_user, updated_by } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_stock_transfer_order_assign_user] @id, @stock_transfer_number, @assign_user, @updated_by`, [
-      { name: 'id', type: sql.Int, value: id },
-      { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
-      { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
-      { name: 'updated_by', type: sql.NVarChar(50), value: updated_by },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_stock_transfer_order_assign_user] @id, @stock_transfer_number, @assign_user, @updated_by`,
+      [
+        { name: 'id', type: sql.Int, value: id },
+        { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
+        { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
+        { name: 'updated_by', type: sql.NVarChar(50), value: updated_by },
+      ]
+    );
     res.json(result[0]);
   } catch (error) {
     console.error('Error assigning user to stock transfer order:', error);
@@ -69,7 +75,7 @@ export const getStockTransferOrderDetails = async (req, res) => {
       { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
     ]);
     console.log(result);
-    if (!result || result.length === 0 || (result[0].Status === 'F')) {
+    if (!result || result.length === 0 || result[0].Status === 'F') {
       // Fetch from SAP OData
       try {
         const headerUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/StockTransferWMS?$filter=No eq '${encodeURIComponent(stock_transfer_number)}'`;
@@ -117,7 +123,7 @@ export const getStockTransferOrderDetails = async (req, res) => {
           created_by: '',
           created_date: null,
           updated_by: '',
-          updated_date: null
+          updated_date: null,
         }));
 
         res.json(formattedResult);
@@ -141,5 +147,58 @@ export const getRecentStockTransferOrders = async (req, res) => {
   } catch (error) {
     console.error('Error getting recent stock transfer orders:', error);
     res.status(500).json({ error: 'Failed to get recent orders' });
+  }
+};
+
+export const getStockTransferOrdersByDateRange = async (req, res) => {
+  const { from_date, to_date } = req.body;
+
+  if (!from_date || !to_date) {
+    return res.status(400).json({ error: 'from_date and to_date are required' });
+  }
+
+  try {
+    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/StockTransferWMS?$filter=Posting_Date ge ${from_date} and Posting_Date le ${to_date}`;
+
+    const response = await axios.get(url, {
+      auth: {
+        username: ODATA_USERNAME,
+        password: ODATA_PASSWORD,
+      },
+      timeout: 30000, // 30 seconds timeout
+    });
+
+    const data = response.data.value;
+
+    if (!data || data.length === 0) {
+      return res.json({ Status: 'T', Message: 'No stock transfer orders found for the given date range', data: [] });
+    }
+
+    // Extract only the stock transfer numbers
+    const stockTransferNumbers = data.map(item => item.No);
+
+    res.json({ Status: 'T', Message: 'Stock transfer orders fetched successfully', data: stockTransferNumbers });
+  } catch (error) {
+    console.error('Error fetching stock transfer orders by date range:', error);
+
+    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+      return res
+        .status(504)
+        .json({ Status: 'F', Message: 'ERP API request timeout. Please try again later.', data: [] });
+    }
+
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+      return res
+        .status(503)
+        .json({ Status: 'F', Message: 'ERP API is not responding. Please try again later.', data: [] });
+    }
+
+    if (error.response) {
+      return res
+        .status(error.response.status)
+        .json({ Status: 'F', Message: `ERP API error: ${error.response.statusText}`, data: [] });
+    }
+
+    res.status(500).json({ Status: 'F', Message: 'Failed to fetch stock transfer orders from ERP', data: [] });
   }
 };

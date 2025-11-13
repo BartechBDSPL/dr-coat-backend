@@ -170,7 +170,6 @@ export const checkUniqueItemNos = async (req, res) => {
   }
 };
 
-
 export const checkUniquePackingList = async (req, res) => {
   try {
     const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC%20UAT%2005032024')/ItemPackingListWMS`;

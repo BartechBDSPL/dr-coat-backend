@@ -52,15 +52,7 @@ export const getAllItemPackingDetails = async (req, res) => {
 };
 
 export const insertItemPackingDetails = async (req, res) => {
-  const {
-    item_no,
-    cust_no,
-    packing_code,
-    qty_per_uom,
-    description,
-    uom_major_value,
-    created_by,
-  } = req.body;
+  const { item_no, cust_no, packing_code, qty_per_uom, description, uom_major_value, created_by } = req.body;
 
   try {
     const result = await executeQuery(
@@ -84,16 +76,7 @@ export const insertItemPackingDetails = async (req, res) => {
 };
 
 export const updateItemPackingDetails = async (req, res) => {
-  const {
-    id,
-    item_no,
-    cust_no,
-    packing_code,
-    qty_per_uom,
-    description,
-    uom_major_value,
-    updated_by,
-  } = req.body;
+  const { id, item_no, cust_no, packing_code, qty_per_uom, description, uom_major_value, updated_by } = req.body;
 
   try {
     const result = await executeQuery(

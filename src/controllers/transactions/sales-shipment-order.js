@@ -2,72 +2,78 @@ import { executeQuery, sql } from '../../config/db.js';
 import axios from 'axios';
 import { ODATA_BASE_URL, ODATA_USERNAME, ODATA_PASSWORD } from '../../utils/constants.js';
 export const insertSalesShipmentOrder = async (req, res) => {
-    const {
-        entry_no,
-        order_no,
-        shipment_no,
-        sell_to_customer_no,
-        sell_to_customer_name,
-        order_date,
-        posting_date,
-        external_document_no,
-        item_code,
-        item_description,
-        variant_code,
-        location_code,
-        quantity,
-        packing_details,
-        uom,
-        lot_no,
-        truck_no,
-        driver_name,
-        driver_contact_no,
-        created_by,
-        assign_user
-    } = req.body;
+  const {
+    entry_no,
+    order_no,
+    shipment_no,
+    sell_to_customer_no,
+    sell_to_customer_name,
+    order_date,
+    posting_date,
+    external_document_no,
+    item_code,
+    item_description,
+    variant_code,
+    location_code,
+    quantity,
+    packing_details,
+    uom,
+    lot_no,
+    truck_no,
+    driver_name,
+    driver_contact_no,
+    created_by,
+    assign_user,
+  } = req.body;
 
-    try {
-        const result = await executeQuery(`EXEC [dbo].[sp_shipment_order_insert] @entry_no, @order_no, @shipment_no, @sell_to_customer_no, @sell_to_customer_name, @order_date, @posting_date, @external_document_no, @item_code, @item_description, @variant_code, @location_code, @quantity, @packing_details, @uom, @lot_no, @truck_no, @driver_name, @driver_contact_no, @assign_user, @created_by`, [
-            { name: 'entry_no', type: sql.NVarChar(10), value: entry_no },
-            { name: 'order_no', type: sql.NVarChar(50), value: order_no },
-            { name: 'shipment_no', type: sql.NVarChar(50), value: shipment_no },
-            { name: 'sell_to_customer_no', type: sql.NVarChar(50), value: sell_to_customer_no },
-            { name: 'sell_to_customer_name', type: sql.NVarChar(200), value: sell_to_customer_name },
-            { name: 'order_date', type: sql.NVarChar(10), value: order_date },
-            { name: 'posting_date', type: sql.NVarChar(10), value: posting_date },
-            { name: 'external_document_no', type: sql.NVarChar(50), value: external_document_no },
-            { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-            { name: 'item_description', type: sql.NVarChar(200), value: item_description },
-            { name: 'variant_code', type: sql.NVarChar(50), value: variant_code },
-            { name: 'location_code', type: sql.NVarChar(50), value: location_code },
-            { name: 'quantity', type: sql.Decimal(18,3), value: quantity },
-            { name: 'packing_details', type: sql.NVarChar(50), value: packing_details },
-            { name: 'uom', type: sql.NVarChar(10), value: uom },
-            { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-            { name: 'truck_no', type: sql.NVarChar(10), value: truck_no },
-            { name: 'driver_name', type: sql.NVarChar(50), value: driver_name },
-            { name: 'driver_contact_no', type: sql.NVarChar(20), value: driver_contact_no },
-            { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
-            { name: 'created_by', type: sql.NVarChar(50), value: created_by },
-        ]);
-        res.json(result[0]);
-    } catch (error) {
-        console.error('Error inserting sales shipment order:', error);
-        res.status(500).json({ error: 'Failed to insert sales shipment order' });
-    }
+  try {
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_shipment_order_insert] @entry_no, @order_no, @shipment_no, @sell_to_customer_no, @sell_to_customer_name, @order_date, @posting_date, @external_document_no, @item_code, @item_description, @variant_code, @location_code, @quantity, @packing_details, @uom, @lot_no, @truck_no, @driver_name, @driver_contact_no, @assign_user, @created_by`,
+      [
+        { name: 'entry_no', type: sql.NVarChar(10), value: entry_no },
+        { name: 'order_no', type: sql.NVarChar(50), value: order_no },
+        { name: 'shipment_no', type: sql.NVarChar(50), value: shipment_no },
+        { name: 'sell_to_customer_no', type: sql.NVarChar(50), value: sell_to_customer_no },
+        { name: 'sell_to_customer_name', type: sql.NVarChar(200), value: sell_to_customer_name },
+        { name: 'order_date', type: sql.NVarChar(10), value: order_date },
+        { name: 'posting_date', type: sql.NVarChar(10), value: posting_date },
+        { name: 'external_document_no', type: sql.NVarChar(50), value: external_document_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'item_description', type: sql.NVarChar(200), value: item_description },
+        { name: 'variant_code', type: sql.NVarChar(50), value: variant_code },
+        { name: 'location_code', type: sql.NVarChar(50), value: location_code },
+        { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
+        { name: 'packing_details', type: sql.NVarChar(50), value: packing_details },
+        { name: 'uom', type: sql.NVarChar(10), value: uom },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'truck_no', type: sql.NVarChar(10), value: truck_no },
+        { name: 'driver_name', type: sql.NVarChar(50), value: driver_name },
+        { name: 'driver_contact_no', type: sql.NVarChar(20), value: driver_contact_no },
+        { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
+        { name: 'created_by', type: sql.NVarChar(50), value: created_by },
+      ]
+    );
+    res.json(result[0]);
+  } catch (error) {
+    console.error('Error inserting sales shipment order:', error);
+    res.status(500).json({ error: 'Failed to insert sales shipment order' });
+  }
 };
 
 export const assignUserToSalesShipmentOrder = async (req, res) => {
   const { shipment_no, item_code, lot_no, assign_user, updated_by } = req.body;
 
   try {
-    const result = await executeQuery(`EXEC [dbo].[sp_shipment_order_assign_user] @shipment_no, @item_code, @lot_no, @assign_user, @updated_by`, [
-      { name: 'shipment_no', type: sql.NVarChar(50), value: shipment_no },
-      { name: 'item_code', type: sql.NVarChar(50), value: item_code },
-      { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
-      { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
-      { name: 'updated_by', type: sql.NVarChar(50), value: updated_by },
-    ]);
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_shipment_order_assign_user] @shipment_no, @item_code, @lot_no, @assign_user, @updated_by`,
+      [
+        { name: 'shipment_no', type: sql.NVarChar(50), value: shipment_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+        { name: 'assign_user', type: sql.NVarChar(200), value: assign_user },
+        { name: 'updated_by', type: sql.NVarChar(50), value: updated_by },
+      ]
+    );
     res.json(result[0]);
   } catch (error) {
     console.error('Error assigning user to sales shipment order:', error);
@@ -84,7 +90,11 @@ export const getSalesShipmentOrderDetails = async (req, res) => {
     ]);
     console.log(result);
 
-    if (!result || result.length === 0 || (result.length > 0 && result[0].Status === 'F' && result[0].Message.includes('Incorrect shipment no.'))) {
+    if (
+      !result ||
+      result.length === 0 ||
+      (result.length > 0 && result[0].Status === 'F' && result[0].Message.includes('Incorrect shipment no.'))
+    ) {
       // Fetch from SAP OData
       try {
         const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesShipmentDetailsWMS?$filter=ShipmentNo eq '${encodeURIComponent(shipment_no)}'`;
@@ -95,7 +105,7 @@ export const getSalesShipmentOrderDetails = async (req, res) => {
           },
         });
         const data = response.data.value;
-        console.log("Response is ",response, url)
+        console.log('Response is ', response, url);
         if (!data || data.length === 0) {
           return res.json({ Status: 'F', Message: 'Sales shipment order not found in ERP' });
         }
@@ -113,7 +123,7 @@ export const getSalesShipmentOrderDetails = async (req, res) => {
           remaining_qty: item.Quantity,
           truck_no: '',
           driver_name: '',
-          driver_contact_no: ''
+          driver_contact_no: '',
         }));
 
         res.json({ isFromAPI: true, data: formattedResult });
@@ -121,7 +131,7 @@ export const getSalesShipmentOrderDetails = async (req, res) => {
         console.error('Error fetching from OData:', odataError);
         res.status(500).json({ error: 'Failed to fetch from ERP' });
       }
-    } else if(result[0].Status === 'F' && result[0].Message.includes('Shipment order picking is completed')){
+    } else if (result[0].Status === 'F' && result[0].Message.includes('Shipment order picking is completed')) {
       res.json(result[0]);
     } else {
       const formattedResult = result.map(item => ({
@@ -138,7 +148,7 @@ export const getSalesShipmentOrderDetails = async (req, res) => {
         remaining_qty: item.remaining_qty,
         truck_no: item.truck_no,
         driver_name: item.driver_name,
-        driver_contact_no: item.driver_contact_no
+        driver_contact_no: item.driver_contact_no,
       }));
       res.json({ isFromAPI: false, data: formattedResult });
     }
@@ -155,5 +165,58 @@ export const getRecentSalesShipmentOrders = async (req, res) => {
   } catch (error) {
     console.error('Error getting recent sales shipment orders:', error);
     res.status(500).json({ error: 'Failed to get recent orders' });
+  }
+};
+
+export const getSalesShipmentOrdersByDateRange = async (req, res) => {
+  const { from_date, to_date } = req.body;
+
+  if (!from_date || !to_date) {
+    return res.status(400).json({ error: 'from_date and to_date are required' });
+  }
+
+  try {
+    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesShipmentDetailsWMS?$filter=Posting_Date ge ${from_date} and Posting_Date le ${to_date}`;
+
+    const response = await axios.get(url, {
+      auth: {
+        username: ODATA_USERNAME,
+        password: ODATA_PASSWORD,
+      },
+      timeout: 30000, // 30 seconds timeout
+    });
+
+    const data = response.data.value;
+
+    if (!data || data.length === 0) {
+      return res.json({ Status: 'T', Message: 'No sales shipment orders found for the given date range', data: [] });
+    }
+
+    // Extract unique shipment numbers
+    const shipmentNumbers = [...new Set(data.map(item => item.ShipmentNo))];
+
+    res.json({ Status: 'T', Message: 'Sales shipment orders fetched successfully', data: shipmentNumbers });
+  } catch (error) {
+    console.error('Error fetching sales shipment orders by date range:', error);
+
+    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+      return res
+        .status(504)
+        .json({ Status: 'F', Message: 'ERP API request timeout. Please try again later.', data: [] });
+    }
+
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+      return res
+        .status(503)
+        .json({ Status: 'F', Message: 'ERP API is not responding. Please try again later.', data: [] });
+    }
+
+    if (error.response) {
+      return res
+        .status(error.response.status)
+        .json({ Status: 'F', Message: `ERP API error: ${error.response.statusText}`, data: [] });
+    }
+
+    res.status(500).json({ Status: 'F', Message: 'Failed to fetch sales shipment orders from ERP', data: [] });
   }
 };

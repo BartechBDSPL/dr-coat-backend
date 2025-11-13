@@ -25,7 +25,7 @@ const authWithSession = (req, res, next) => {
 
       // Check session timeout - user ID is in decoded.user.user_id
       const userId = decoded.user?.user_id;
-      
+
       if (!userId) {
         console.error('❌ Token structure missing user.user_id:', JSON.stringify(decoded, null, 2));
         return res.status(401).json({

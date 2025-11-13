@@ -7,6 +7,8 @@ import * as hhtShipmentOrderController from '../controllers/hht/hhtShipmentOrder
 import * as hhtPrinterController from '../controllers/hht/hhtPrinter.js';
 import * as hhtMaterialReturnController from '../controllers/hht/hhtMaterialReturn.js';
 
+import * as fgStockTakeController from '../controllers/hht/fg-stock-take.js';
+
 const router = express.Router();
 
 // FG Operations
@@ -16,7 +18,6 @@ router.post('/fg-put-away-update', hhtPutAwayROutes.putAwayUpdate);
 router.post('/fg-put-away-location-suggestion', hhtPutAwayROutes.putAwayLocationSuggestion);
 router.post('/fg-put-away-check-location', hhtPutAwayROutes.checkLocationExists);
 router.get('/warehouse-codes', hhtPutAwayROutes.getAllWarehouseCodes);
-
 
 // FG Internal Movement
 router.post('/fg-int-mv-barcode-validation', InternalMovementController.internalBarcodeValidation);
@@ -33,7 +34,10 @@ router.post('/stock-transfer-manual-close', hhtStockTransferOrderController.manu
 router.post('/stock-transfer-recent-picked-details', hhtStockTransferOrderController.getRecentPickedDetails);
 
 // HHT Stock Transfer Material Receipt
-router.post('/stock-transfer-material-receipt-numbers', hhtStockTransferMaterialReceiptController.getStockTransferNumbers);
+router.post(
+  '/stock-transfer-material-receipt-numbers',
+  hhtStockTransferMaterialReceiptController.getStockTransferNumbers
+);
 router.post('/stock-transfer-material-receipt-serial-nos', hhtStockTransferMaterialReceiptController.getAllSerialNos);
 router.post('/stock-transfer-material-receipt-update', hhtStockTransferMaterialReceiptController.updateMaterialReceipt);
 
@@ -53,5 +57,10 @@ router.get('/printer-data', hhtPrinterController.getPrinterData);
 // HHT Material Return
 router.post('/material-return-details', hhtMaterialReturnController.getMaterialReturnDetails);
 router.post('/material-return-update', hhtMaterialReturnController.updateMaterialReturn);
+
+// FG Stock Take
+router.post('/fg-stock-take-no', fgStockTakeController.getStockTakeNo);
+router.post('/fg-stock-take-validation', fgStockTakeController.validateStockTake);
+router.post('/fg-stock-take-update', fgStockTakeController.updateStockTake);
 
 export default router;
