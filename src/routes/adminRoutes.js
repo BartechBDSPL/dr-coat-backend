@@ -15,6 +15,7 @@ router.get('/all-user-master', UserMaster.getAllUserDetails);
 router.post('/insert-user-master', UserMaster.insertUserDetails);
 router.patch('/edit-user-master', UserMaster.updateUserDetails);
 router.get('/get-all-user-type', UserMaster.getAllUserTypeDD);
+router.get('/active-user-ids', UserMaster.getActiveUserIds);
 
 //Change Password
 router.post('/change-password', auth, ChangePassword.changePassword);

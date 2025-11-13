@@ -107,3 +107,13 @@ export const insertUserDetails = async (req, res) => {
     }
   }
 };
+
+export const getActiveUserIds = async (req, res) => {
+  try {
+    const result = await executeQuery(`EXEC [dbo].[sp_user_master_get_user_id]`, []);
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting active user IDs:', error);
+    res.status(500).json({ error: 'Failed to get active user IDs' });
+  }
+};

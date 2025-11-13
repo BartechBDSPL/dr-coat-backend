@@ -65,7 +65,6 @@ class SessionManager {
     const now = new Date();
     if (!this.lastSessionTimeUpdate || now - this.lastSessionTimeUpdate > 2 * 60 * 60 * 1000) {
       // 2 hours
-      console.log('🔄 Manual refresh triggered (2+ hours since last update)');
       await this.getSessionTimeout();
     }
   }

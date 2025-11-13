@@ -84,6 +84,7 @@ router.patch('/material/update-details', authWithSession, MaterialMasterControll
 router.post('/upload-material-excel', authWithSession, MaterialMasterController.uploadMaterialExcel);
 router.get('/material/check-unique-nos', authWithSession, MaterialMasterController.checkUniqueItemNos);
 router.get('/material/check-unique-packing-list', authWithSession, MaterialMasterController.checkUniquePackingList);
+router.get('/material/check-unique-shipment-no', MaterialMasterController.checkUniqueShipmentNo);
 
 // Item Packing Master
 router.get('/item-packing/all-details', authWithSession, ItemPackingMasterController.getAllItemPackingDetails);

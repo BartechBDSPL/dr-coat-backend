@@ -17,27 +17,26 @@ export const getLineDataByPlant = async (req, res) => {
 };
 
 export const insertPrinter = async (req, res) => {
-  const { PlantCode, DeviceName, DeviceSrNo, DeviceIp, DeviceMake, AssetCode, Status, Createdby, dpi, LineCode } =
-    req.body;
+  const { plant_code, printer_name, printer_sr_no, printer_ip, printer_make, asset_code, status, created_by, dpi, line_code } = req.body;
 
   try {
     const result = await executeQuery(
       'EXEC sp_printer_insert @plant_code, @device_name, @device_sr_no, @device_ip, @device_make, @asset_code, @printer_status, @created_by, @dpi, @line_code',
       [
-        { name: 'plant_code', type: sql.NVarChar(150), value: PlantCode },
-        { name: 'device_name', type: sql.NVarChar(150), value: DeviceName },
-        { name: 'device_sr_no', type: sql.NVarChar(150), value: DeviceSrNo },
-        { name: 'device_ip', type: sql.NVarChar(150), value: DeviceIp },
-        { name: 'device_make', type: sql.NVarChar(150), value: DeviceMake },
-        { name: 'asset_code', type: sql.NVarChar(150), value: AssetCode },
-        { name: 'printer_status', type: sql.NVarChar(150), value: Status },
-        { name: 'created_by', type: sql.NVarChar(150), value: Createdby },
+        { name: 'plant_code', type: sql.NVarChar(150), value: plant_code },
+        { name: 'device_name', type: sql.NVarChar(150), value: printer_name },
+        { name: 'device_sr_no', type: sql.NVarChar(150), value: printer_sr_no },
+        { name: 'device_ip', type: sql.NVarChar(150), value: printer_ip },
+        { name: 'device_make', type: sql.NVarChar(150), value: printer_make },
+        { name: 'asset_code', type: sql.NVarChar(150), value: asset_code },
+        { name: 'printer_status', type: sql.NVarChar(150), value: status },
+        { name: 'created_by', type: sql.NVarChar(150), value: created_by },
         { name: 'dpi', type: sql.NVarChar(50), value: dpi },
-        { name: 'line_code', type: sql.NVarChar(50), value: LineCode },
+        { name: 'line_code', type: sql.NVarChar(50), value: line_code },
       ]
     );
 
-    res.json(result);
+    res.json(result[0]);
   } catch (error) {
     console.error('Error executing stored procedure:', error);
     res.status(500).json({ error: error.message });
@@ -46,53 +45,52 @@ export const insertPrinter = async (req, res) => {
 
 export const updatePrinter = async (req, res) => {
   const {
-    DvcID,
-    PlantCode,
-    DeviceName,
-    DeviceSrNo,
-    DeviceIp,
-    DeviceMake,
-    AssetCode,
-    Status,
-    Updatedby,
-    OldPlantCode,
-    OldDeviceSrNo,
-    OldDeviceIp,
-    LineCode,
+    id,
+    plant_code,
+    printer_name,
+    printer_sr_no,
+    printer_ip,
+    printer_make,
+    asset_code,
+    status,
+    updated_by,
+    old_plant_code,
+    old_printer_sr_no,
+    old_printer_ip,
+    line_code,
     dpi,
-    DefaultValue,
   } = req.body;
 
   try {
     const result = await executeQuery(
       'EXEC sp_printer_update @id, @plant_code, @device_name, @device_sr_no, @device_ip, @device_make, @asset_code, @printer_status, @updated_by, @old_plant_code, @old_device_sr_no, @old_device_ip, @line_code, @dpi',
       [
-        { name: 'id', type: sql.Int, value: DvcID },
-        { name: 'plant_code', type: sql.NVarChar(150), value: PlantCode },
-        { name: 'device_name', type: sql.NVarChar(150), value: DeviceName },
-        { name: 'device_sr_no', type: sql.NVarChar(150), value: DeviceSrNo },
-        { name: 'device_ip', type: sql.NVarChar(150), value: DeviceIp },
-        { name: 'device_make', type: sql.NVarChar(150), value: DeviceMake },
-        { name: 'asset_code', type: sql.NVarChar(150), value: AssetCode },
-        { name: 'printer_status', type: sql.NVarChar(150), value: Status },
-        { name: 'updated_by', type: sql.NVarChar(150), value: Updatedby },
+        { name: 'id', type: sql.Int, value: id },
+        { name: 'plant_code', type: sql.NVarChar(150), value: plant_code },
+        { name: 'device_name', type: sql.NVarChar(150), value: printer_name },
+        { name: 'device_sr_no', type: sql.NVarChar(150), value: printer_sr_no },
+        { name: 'device_ip', type: sql.NVarChar(150), value: printer_ip },
+        { name: 'device_make', type: sql.NVarChar(150), value: printer_make },
+        { name: 'asset_code', type: sql.NVarChar(150), value: asset_code },
+        { name: 'printer_status', type: sql.NVarChar(150), value: status },
+        { name: 'updated_by', type: sql.NVarChar(150), value: updated_by },
         {
           name: 'old_plant_code',
           type: sql.NVarChar(150),
-          value: OldPlantCode,
+          value: old_plant_code,
         },
         {
           name: 'old_device_sr_no',
           type: sql.NVarChar(150),
-          value: OldDeviceSrNo,
+          value: old_printer_sr_no,
         },
-        { name: 'old_device_ip', type: sql.NVarChar(150), value: OldDeviceIp },
-        { name: 'line_code', type: sql.NVarChar(50), value: LineCode },
+        { name: 'old_device_ip', type: sql.NVarChar(150), value: old_printer_ip },
+        { name: 'line_code', type: sql.NVarChar(50), value: line_code },
         { name: 'dpi', type: sql.NVarChar(50), value: dpi },
       ]
     );
 
-    res.json(result);
+    res.json(result[0]);
   } catch (error) {
     console.error('Error executing stored procedure:', error);
     res.status(500).json({ error: error.message });

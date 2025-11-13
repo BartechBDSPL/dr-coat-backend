@@ -5,7 +5,7 @@ const config = {
   database: 'dr_coat_and_resin_wms',
   driver: 'msnodesqlv8',
   options: {
-    trustedConnection: true,
+    trustedConnection: false,
     trustServerCertificate: true,
     encrypt: false,
   },

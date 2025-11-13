@@ -1,7 +1,7 @@
 import { executeQuery } from '../../config/db.js';
 export const getPrinterData = async (req, res) => {
   try {
-    const result = await executeQuery('EXEC [dbo].[HHT_Printer_Data]');
+    const result = await executeQuery('EXEC [dbo].[hht_printer_data]');
     // console.log(result)
     res.json(result);
   } catch (error) {

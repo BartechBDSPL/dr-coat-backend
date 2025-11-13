@@ -199,6 +199,34 @@ export const checkUniquePackingList = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+export const checkUniqueShipmentNo = async (req, res) => {
+  try {
+    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesShipmentDetailsWMS`;
+    const response = await axios.get(url, {
+      auth: {
+        username: ODATA_USERNAME,
+        password: ODATA_PASSWORD,
+      },
+    });
+
+    const data = response.data.value;
+    const nos = data.map(item => item.ShipmentNo);
+    const uniqueNos = new Set(nos);
+
+    if (uniqueNos.size === nos.length) {
+      console.log('All item nos are unique');
+      res.status(200).json({ unique: true, message: 'All item nos are unique' });
+    } else {
+      const duplicates = nos.filter((ShipmentNo, index) => nos.indexOf(ShipmentNo) !== index);
+      const uniqueDuplicates = [...new Set(duplicates)];
+      console.log('Duplicate item nos:', uniqueDuplicates);
+      res.status(200).json({ unique: false, duplicates: uniqueDuplicates, message: 'Some item nos are not unique' });
+    }
+  } catch (error) {
+    console.error('Error checking unique item nos:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
 // Set up multer storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

@@ -12,7 +12,6 @@ import hhtRoutes from './routes/hhtRoutes.js';
 import reportsRoutes from './routes/reportsRoute.js';
 import reprintRoutes from './routes/reprintRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
-import resortingRoutes from './routes/reesortingRoutes.js';
 import sapTransactionRoutes from './routes/sapTransaction.js';
 import sessionManager from './utils/sessionManager.js';
 
@@ -48,7 +47,6 @@ app.use('/api/hht', hhtRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/reprint', reprintRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/resorting', resortingRoutes);
 app.use('/api/sap-transaction', sapTransactionRoutes);
 
 app.use('/', (req, res) => {
