@@ -9,7 +9,7 @@ export const getAllItemPackingDetails = async (req, res) => {
     const dbCount = result.length;
 
     try {
-      const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC%20UAT%2005032024')/ItemPackingListWMS`;
+      const url = `${ODATA_BASE_URL}/ItemPackingListWMS`;
       const odataResponse = await axios.get(url, {
         auth: {
           username: ODATA_USERNAME,

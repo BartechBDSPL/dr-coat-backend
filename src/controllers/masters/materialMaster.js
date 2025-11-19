@@ -13,7 +13,7 @@ export const getAllMaterialDetails = async (req, res) => {
     const dbCount = result.length;
 
     try {
-      const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company(%27DRC%20UAT%2005032024%27)/ItemMasterWMS`;
+      const url = `${ODATA_BASE_URL}/ItemMasterWMS`;
       const odataResponse = await axios.get(url, {
         auth: {
           username: ODATA_USERNAME,
@@ -143,7 +143,7 @@ export const updateMaterialDetails = async (req, res) => {
 
 export const checkUniqueItemNos = async (req, res) => {
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company(%27DRC%20UAT%2005032024%27)/ItemMasterWMS`;
+    const url = `${ODATA_BASE_URL}/ItemMasterWMS`;
     const response = await axios.get(url, {
       auth: {
         username: ODATA_USERNAME,
@@ -172,7 +172,7 @@ export const checkUniqueItemNos = async (req, res) => {
 
 export const checkUniquePackingList = async (req, res) => {
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC%20UAT%2005032024')/ItemPackingListWMS`;
+    const url = `${ODATA_BASE_URL}/ItemPackingListWMS`;
     const response = await axios.get(url, {
       auth: {
         username: ODATA_USERNAME,
@@ -200,7 +200,7 @@ export const checkUniquePackingList = async (req, res) => {
 };
 export const checkUniqueShipmentNo = async (req, res) => {
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesShipmentDetailsWMS`;
+    const url = `${ODATA_BASE_URL}/SalesShipmentDetailsWMS`;
     const response = await axios.get(url, {
       auth: {
         username: ODATA_USERNAME,

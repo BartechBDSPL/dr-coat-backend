@@ -97,7 +97,7 @@ export const getSalesShipmentOrderDetails = async (req, res) => {
     ) {
       // Fetch from SAP OData
       try {
-        const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesShipmentDetailsWMS?$filter=ShipmentNo eq '${encodeURIComponent(shipment_no)}'`;
+        const url = `${ODATA_BASE_URL}/SalesShipmentDetailsWMS?$filter=ShipmentNo eq '${encodeURIComponent(shipment_no)}'`;
         const response = await axios.get(url, {
           auth: {
             username: ODATA_USERNAME,
@@ -176,7 +176,7 @@ export const getSalesShipmentOrdersByDateRange = async (req, res) => {
   }
 
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesShipmentDetailsWMS?$filter=Posting_Date ge ${from_date} and Posting_Date le ${to_date}`;
+    const url = `${ODATA_BASE_URL}/SalesShipmentDetailsWMS?$filter=Posting_Date ge ${from_date} and Posting_Date le ${to_date}`;
 
     const response = await axios.get(url, {
       auth: {

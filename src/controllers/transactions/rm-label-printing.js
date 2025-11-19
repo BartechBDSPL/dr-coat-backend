@@ -12,7 +12,7 @@ export const getGRNDetails = async (req, res) => {
 
     if (result[0].Status === 'F' && result[0].Message.includes('GRN does not')) {
       // Fetch from OData
-      const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC%20UAT%2005032024')/GRNWMS?$filter=GRNNo eq '${grn_no}'`;
+      const url = `${ODATA_BASE_URL}/GRNWMS?$filter=GRNNo eq '${grn_no}'`;
       const odataResponse = await axios.get(url, {
         auth: {
           username: ODATA_USERNAME,
@@ -67,7 +67,7 @@ export const getGRNDetails = async (req, res) => {
 
 export const checkSalesOrderUniqueNumber = async (req, res) => {
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/SalesOrdersWMS`;
+    const url = `${ODATA_BASE_URL}/SalesOrdersWMS`;
     const response = await axios.get(url, {
       auth: {
         username: ODATA_USERNAME,
@@ -96,7 +96,7 @@ export const checkSalesOrderUniqueNumber = async (req, res) => {
 
 export const checkSalesOrderLineUniqueNumber = async (req, res) => {
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company(%27DRC UAT 05032024%27)/SalesOrdersLineWMS`;
+    const url = `${ODATA_BASE_URL}/SalesOrdersLineWMS`;
     const response = await axios.get(url, {
       auth: {
         username: ODATA_USERNAME,

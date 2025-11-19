@@ -14,6 +14,6 @@ export const SAP_SERVER = {
   Language: 'EN',
 };
 
-export const ODATA_BASE_URL = 'https://salesforceuat.drcresins.com:2102';
+export const ODATA_BASE_URL = 'https://salesforceuat.drcresins.com:5102/DRcoats_sandbox/ODataV4/Company(\'D.R.%20Coats%20live\')';
 export const ODATA_USERNAME = 'CRM.2';
 export const ODATA_PASSWORD = 'Admin@2025';

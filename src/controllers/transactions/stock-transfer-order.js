@@ -78,7 +78,7 @@ export const getStockTransferOrderDetails = async (req, res) => {
     if (!result || result.length === 0 || result[0].Status === 'F') {
       // Fetch from SAP OData
       try {
-        const headerUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/StockTransferWMS?$filter=No eq '${encodeURIComponent(stock_transfer_number)}'`;
+        const headerUrl = `${ODATA_BASE_URL}/StockTransferWMS?$filter=No eq '${encodeURIComponent(stock_transfer_number)}'`;
         const headerResponse = await axios.get(headerUrl, {
           auth: {
             username: ODATA_USERNAME,
@@ -93,7 +93,7 @@ export const getStockTransferOrderDetails = async (req, res) => {
 
         const header = headerData[0];
 
-        const lineUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/StockTransferLineWMS?$filter=Document_No eq '${encodeURIComponent(stock_transfer_number)}'`;
+        const lineUrl = `${ODATA_BASE_URL}/StockTransferLineWMS?$filter=Document_No eq '${encodeURIComponent(stock_transfer_number)}'`;
         const lineResponse = await axios.get(lineUrl, {
           auth: {
             username: ODATA_USERNAME,
@@ -158,7 +158,7 @@ export const getStockTransferOrdersByDateRange = async (req, res) => {
   }
 
   try {
-    const url = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/StockTransferWMS?$filter=Posting_Date ge ${from_date} and Posting_Date le ${to_date}`;
+    const url = `${ODATA_BASE_URL}/StockTransferWMS?$filter=Posting_Date ge ${from_date} and Posting_Date le ${to_date}`;
 
     const response = await axios.get(url, {
       auth: {

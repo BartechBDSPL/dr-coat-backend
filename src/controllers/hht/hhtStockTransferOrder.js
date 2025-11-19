@@ -134,7 +134,7 @@ export const manualCloseStockTransferOrder = async (req, res) => {
     ]);
 
     // Post to OData for each detail
-    const postUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/PostStockTransferItemTrackingWMS`;
+    const postUrl = `${ODATA_BASE_URL}/PostStockTransferItemTrackingWMS`;
     for (const detail of pickedDetails) {
       const body = {
         Type: 'Transfer',

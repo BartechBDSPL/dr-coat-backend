@@ -219,7 +219,7 @@ export const getProductionOrderDetails = async (req, res) => {
     }
 
     // If result is empty or printed_qty is null, fetch from SAP OData
-    const sapUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/ReleasedProdOrderWMS?$filter=Prod_Order_No eq '${encodeURIComponent(production_order_no)}'`;
+    const sapUrl = `${ODATA_BASE_URL}/ReleasedProdOrderWMS?$filter=Prod_Order_No eq '${encodeURIComponent(production_order_no)}'`;
     const sapResponse = await axios.get(sapUrl, {
       auth: {
         username: ODATA_USERNAME,
@@ -234,7 +234,7 @@ export const getProductionOrderDetails = async (req, res) => {
 
     const item = erpData[0];
     // Fetch lot no tracking for entry_no and lot_no
-    const lotUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/LotNoTrackingWMS?$filter=Order_No eq '${encodeURIComponent(production_order_no)}'`;
+    const lotUrl = `${ODATA_BASE_URL}/LotNoTrackingWMS?$filter=Order_No eq '${encodeURIComponent(production_order_no)}'`;
     const lotResponse = await axios.get(lotUrl, {
       auth: {
         username: ODATA_USERNAME,
