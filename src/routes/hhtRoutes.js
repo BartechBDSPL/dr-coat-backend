@@ -9,6 +9,12 @@ import * as hhtMaterialReturnController from '../controllers/hht/hhtMaterialRetu
 
 import * as fgStockTakeController from '../controllers/hht/fg-stock-take.js';
 
+import * as fgStockAdjustmentController from '../controllers/hht/fg-stock-adjustment.js';
+
+import * as fgItemSplitController from '../controllers/hht/fg-item-split.js';
+
+import * as fgRepackingController from '../controllers/hht/fg-repacking.js';
+
 const router = express.Router();
 
 // FG Operations
@@ -62,5 +68,17 @@ router.post('/material-return-update', hhtMaterialReturnController.updateMateria
 router.post('/fg-stock-take-no', fgStockTakeController.getStockTakeNo);
 router.post('/fg-stock-take-validation', fgStockTakeController.validateStockTake);
 router.post('/fg-stock-take-update', fgStockTakeController.updateStockTake);
+
+// FG Stock Adjustment
+router.post('/fg-stock-adjustment-validation', fgStockAdjustmentController.validateStockAdjustment);
+router.post('/fg-stock-adjustment-update', fgStockAdjustmentController.updateStockAdjustment);
+
+// FG Item Split
+router.post('/fg-item-split-validation', fgItemSplitController.validateItemSplit);
+router.post('/fg-item-split-update', fgItemSplitController.updateItemSplit);
+
+// FG Repacking
+router.post('/fg-repacking-validation', fgRepackingController.validateRepacking);
+router.post('/fg-repacking-update', fgRepackingController.updateRepacking);
 
 export default router;

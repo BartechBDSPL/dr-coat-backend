@@ -11,6 +11,7 @@ import * as ShiftMasterController from '../controllers/masters/shiftMaster.js';
 import * as PrinterMasterController from '../controllers/masters/printerMaster.js';
 import * as MaterialMasterController from '../controllers/masters/materialMaster.js';
 import * as ItemPackingMasterController from '../controllers/masters/itemPackingMaster.js';
+import * as ExistingDataUploadController from '../controllers/masters/existing-data-upload.js';
 import { authWithSession } from '../middleware/authWithSession.js';
 const router = express.Router();
 
@@ -88,5 +89,14 @@ router.get('/material/check-unique-shipment-no', MaterialMasterController.checkU
 router.get('/item-packing/all-details', authWithSession, ItemPackingMasterController.getAllItemPackingDetails);
 router.post('/item-packing/insert-details', authWithSession, ItemPackingMasterController.insertItemPackingDetails);
 router.patch('/item-packing/update-details', authWithSession, ItemPackingMasterController.updateItemPackingDetails);
+
+// Existing Data Upload
+router.post('/existing-data/upload-excel', authWithSession, ExistingDataUploadController.uploadExistingData);
+router.get('/existing-data/get-item-codes', authWithSession, ExistingDataUploadController.getItemCodes);
+router.post('/existing-data/get-lot-numbers', authWithSession, ExistingDataUploadController.getLotNumbers);
+router.post('/existing-data/get-details', authWithSession, ExistingDataUploadController.getDetails);
+router.post('/existing-data/upsert-serial-number', authWithSession, ExistingDataUploadController.upsertSerialNumber);
+router.post('/existing-data/find-serial-number', authWithSession, ExistingDataUploadController.findSerialNumber);
+router.post('/existing-data/insert-label-printing', authWithSession, ExistingDataUploadController.insertExistingDataLabelPrinting);
 
 export default router;

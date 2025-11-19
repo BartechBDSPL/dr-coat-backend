@@ -26,12 +26,12 @@ export const getAllUomUnits = async (req, res) => {
 };
 
 export const updateUom = async (req, res) => {
-  const { id, uom_code, description, international_standard_code, user } = req.body;
+  const { uom_code, description, international_standard_code, user } = req.body;
+
   try {
     const updateDetails = await executeQuery(
-      'EXEC sp_uom_master_update @id, @uom_code, @description, @international_standard_code, @updated_by',
+      'EXEC sp_uom_master_update @uom_code, @description, @international_standard_code, @updated_by',
       [
-        { name: 'id', type: sql.Int, value: id },
         { name: 'uom_code', type: sql.NVarChar, value: uom_code },
         { name: 'description', type: sql.NVarChar, value: description },
         { name: 'international_standard_code', type: sql.NVarChar, value: international_standard_code },
@@ -106,10 +106,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-}).fields([
-  { name: 'excelFile', maxCount: 1 },
-  { name: 'username', maxCount: 1 },
-]);
+}).single('excelFile');
 
 // Function to upload and process Excel file
 export const uploadUomExcel = async (req, res) => {
@@ -137,9 +134,9 @@ export const uploadUomExcel = async (req, res) => {
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const data = xlsx.utils.sheet_to_json(worksheet);
+        const rawData = xlsx.utils.sheet_to_json(worksheet, { defval: '' });
 
-        if (data.length === 0) {
+        if (rawData.length === 0) {
           // Delete the file after processing
           fs.unlinkSync(filePath);
           return res.status(400).json({
@@ -148,12 +145,21 @@ export const uploadUomExcel = async (req, res) => {
           });
         }
 
-        // Check if required headers exist
-        const requiredHeaders = ['Code', 'Description', 'International Standard Code'];
+        // Normalize data by trimming header names
+        const data = rawData.map(row => {
+          const normalizedRow = {};
+          Object.keys(row).forEach(key => {
+            const normalizedKey = key.trim();
+            normalizedRow[normalizedKey] = row[key];
+          });
+          return normalizedRow;
+        });
 
+        // Check if required headers exist (only Code and Description are mandatory)
+        const requiredHeaders = ['Code', 'Description'];
         const fileHeaders = Object.keys(data[0]);
         const missingHeaders = requiredHeaders.filter(header => !fileHeaders.includes(header));
-
+        
         if (missingHeaders.length > 0) {
           // Delete the file after processing
           fs.unlinkSync(filePath);
@@ -188,9 +194,18 @@ export const uploadUomExcel = async (req, res) => {
           // Process all rows in the chunk concurrently
           const chunkPromises = chunk.map(async row => {
             try {
-              const uomCode = row['Code'];
-              const description = row['Description'];
-              const internationalStandardCode = row['International Standard Code'];
+              const uomCode = (row['Code'] || '').toString().trim();
+              const description = (row['Description'] || '').toString().trim();
+              const internationalStandardCode = (row['International Standard Code'] || '').toString().trim();
+              
+              // Skip rows with empty code
+              if (!uomCode) {
+                return {
+                  row,
+                  status: 'F',
+                  message: 'UOM Code is empty',
+                };
+              }
 
               const result = await executeQuery(
                 'EXEC sp_uom_master_upsert_details @uom_code, @description, @international_standard_code, @updated_by',

@@ -15,6 +15,8 @@ router.post('/fg-material-receipt', auth, fgReports.materialReceiptReport);
 // FG Reports
 router.post('/fg-shipment-picking', auth, fgReports.shipmentPickingReport);
 router.post('/fg-material-return', auth, fgReports.materialReturnReport);
+router.post('/fg-stock-take', auth, fgReports.fgStockTakeReport);
+router.post('/fg-stock-adjustment', auth, fgReports.fgStockAdjustmentReport);
 
 // RM Reports
 

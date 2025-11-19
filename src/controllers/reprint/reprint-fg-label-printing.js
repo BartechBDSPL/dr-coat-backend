@@ -292,8 +292,10 @@ export const insertReprintFgLabel = async (req, res) => {
     print_quantity,
     reprint_by,
     reprint_reason,
+    printer_ip,
+    dpi,
   } = req.body;
-
+  console.log(req.body);
   try {
     const result = await executeQuery(
       `EXEC [dbo].[sp_reprint_fg_label_insert] @production_order_no, @item_code, @item_description, @lot_no, @customer_no, @customer_name, @finished_quantity, @uom, @quantity, @serial_no, @print_quantity, @reprint_by, @reprint_reason`,
@@ -313,9 +315,208 @@ export const insertReprintFgLabel = async (req, res) => {
         { name: 'reprint_reason', type: sql.NVarChar(200), value: reprint_reason },
       ]
     );
-    res.json(result[0]);
+
+    if (result[0].Status !== 'T') {
+      return res.json(result[0]);
+    }
+
+    if (printer_ip) {
+      try {
+        const [printerIP, printerPort] = printer_ip.split(':');
+
+        // Use a persistent file path - single file that gets overwritten each time
+        const persistentFilePath = path.join(__dirname, 'reprint_fg_label_print_coat.prn');
+
+        // Prepare PRN content for one print
+        const prnData = prepareFGLabelDataForCoat({
+          production_order_no,
+          item_code,
+          item_description,
+          lot_no,
+          quantity,
+          serial_no,
+          printed_qty: print_quantity,
+          print_by: reprint_by,
+        });
+
+        const prnContent = preparePrnFileCoat(prnData, 'DRCoatLabel_300.prn');
+        if (!prnContent) {
+          throw new Error('Failed to prepare PRN content');
+        }
+
+        // Write the single PRN content to file
+        fs.writeFileSync(persistentFilePath, prnContent);
+
+        console.log('Print data for reprint label:', {
+          production_order_no,
+          item_description,
+          lot_no,
+          item_code,
+          quantity,
+          serial_no,
+          printed_qty: print_quantity,
+          print_by: reprint_by,
+        });
+
+        await batchPrintToTscPrinter({ tempFilePath: persistentFilePath }, printerIP, printerPort || '9100');
+
+        res.status(200).json({
+          ...result[0],
+          printed: true,
+          labels_count: 1,
+        });
+      } catch (printError) {
+        console.error('Printing error:', printError);
+        const errorMessage =
+          printError.message === 'Printer not found'
+            ? 'Cannot find printer but transaction performed successfully'
+            : `Printing failed: ${printError.message}. Transaction performed successfully`;
+        res.status(200).json({
+          ...result[0],
+          printed: false,
+          error: errorMessage,
+        });
+      }
+    } else {
+      res.status(200).json({
+        ...result[0],
+        printed: false,
+      });
+    }
   } catch (error) {
     console.error('Error inserting reprint FG label:', error);
     res.status(500).json({ error: 'Failed to insert reprint FG label' });
   }
 };
+
+// Function to prepare PRN file content for coat labels
+function preparePrnFileCoat(data, labelFile) {
+  const basePath = path.join(__dirname, '..', '..', 'prn-printer');
+  const templatePath = path.join(basePath, labelFile);
+
+  try {
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(`Template file not found: ${labelFile}`);
+    }
+
+    const contentBuffer = fs.readFileSync(templatePath);
+    const bitmapMarker = Buffer.from('BITMAP');
+    const bitmapStartIndex = contentBuffer.indexOf(bitmapMarker);
+
+    if (bitmapStartIndex === -1) {
+      // Fallback for templates without a BITMAP command
+      let content = contentBuffer.toString('latin1');
+      Object.keys(data).forEach(key => {
+        const regex = new RegExp(key, 'g');
+        const value = String(data[key] || '');
+        content = content.replace(regex, value);
+      });
+      return Buffer.from(content, 'latin1');
+    }
+
+    // The text part of the template is everything after the binary data.
+    const boxMarker = Buffer.from('BOX');
+    const boxStartIndex = contentBuffer.indexOf(boxMarker, bitmapStartIndex);
+
+    if (boxStartIndex === -1) {
+      throw new Error('Could not find the BOX command after BITMAP.');
+    }
+
+    // The binary part is everything from BITMAP up to BOX.
+    const binaryPartBuffer = contentBuffer.subarray(bitmapStartIndex, boxStartIndex);
+
+    // The text parts are before BITMAP and from BOX to the end.
+    const textPart1Buffer = contentBuffer.subarray(0, bitmapStartIndex);
+    const textPart2Buffer = contentBuffer.subarray(boxStartIndex);
+
+    let textPart1String = textPart1Buffer.toString('latin1');
+    let textPart2String = textPart2Buffer.toString('latin1');
+
+    // Replace variables in both text parts
+    Object.keys(data).forEach(key => {
+      const regex = new RegExp(key, 'g');
+      const value = String(data[key] || '');
+      textPart1String = textPart1String.replace(regex, value);
+      textPart2String = textPart2String.replace(regex, value);
+    });
+
+    const modifiedTextPart1Buffer = Buffer.from(textPart1String, 'latin1');
+    const modifiedTextPart2Buffer = Buffer.from(textPart2String, 'latin1');
+
+    // Combine the parts back together
+    return Buffer.concat([modifiedTextPart1Buffer, binaryPartBuffer, modifiedTextPart2Buffer]);
+  } catch (error) {
+    console.error('Error preparing PRN content:', error);
+    throw error;
+  }
+}
+
+// Function to prepare label data for DRCoatLabel_300.prn
+function prepareFGLabelDataForCoat(reqData) {
+  // Split item_description into two parts if needed
+  const description = reqData.item_description || '';
+  const maxLength = 40; // Assuming reasonable split
+  const VItem_Description1 = description.length > maxLength ? description.substring(0, maxLength) : description;
+  const VItem_Description2 = description.length > maxLength ? description.substring(maxLength) : '';
+
+  return {
+    VProduction_Order_No: reqData.production_order_no || '',
+    VItem_Description1: VItem_Description1,
+    VLot_No: reqData.lot_no || '',
+    VItem_Code: reqData.item_code || '',
+    VProduction_Quantity: String(reqData.quantity || ''),
+    VSerial_No: reqData.serial_no || '',
+    VItem_Description2: VItem_Description2,
+    VPrinted_Quantity: String(reqData.printed_qty || ''),
+    VPrinted_By: reqData.print_by || '',
+  };
+}
+
+// Batch print function for TSC printer
+async function batchPrintToTscPrinter(printJobs, printerIP, printerPort) {
+  return new Promise((resolve, reject) => {
+    const client = new net.Socket();
+    // Set 2-second timeout for quick printer check
+    client.setTimeout(2000);
+
+    client.connect(
+      {
+        host: printerIP,
+        port: parseInt(printerPort) || 9100,
+      },
+      async () => {
+        try {
+          // Read the persistent print file
+          const combinedContent = fs.readFileSync(printJobs.tempFilePath);
+
+          client.write(combinedContent, err => {
+            if (err) {
+              console.error('Error in batch printing:', err);
+              reject(err);
+            } else {
+              // Don't delete the file - keep it for debugging and memory efficiency
+              console.log(`Print job completed. File retained at: ${printJobs.tempFilePath}`);
+              client.end();
+              resolve();
+            }
+          });
+        } catch (error) {
+          client.destroy();
+          reject(error);
+        }
+      }
+    );
+
+    client.on('error', err => {
+      console.error('Printer connection error:', err);
+      client.destroy();
+      reject(new Error('Printer not found'));
+    });
+
+    client.on('timeout', () => {
+      console.error('Printer connection timeout');
+      client.destroy();
+      reject(new Error('Printer not found'));
+    });
+  });
+}

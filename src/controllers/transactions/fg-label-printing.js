@@ -380,6 +380,7 @@ export const insertFgLabelPrinting = async (req, res) => {
     printer_ip,
     dpi,
   } = req.body;
+
   console.log(req.body);
   try {
     const serialNos = serial_no.split('$').filter(s => s.trim());
@@ -468,15 +469,15 @@ export const insertFgLabelPrinting = async (req, res) => {
         const prnBuffers = [];
 
         // Prepare PRN content for each serial number
-        for (const sn of serialNos) {
+        for (let i = 0; i < serialNos.length; i++) {
           const prnData = prepareFGLabelDataForCoat({
             production_order_no,
             item_code,
             item_description,
             lot_no,
             quantity,
-            serial_no: sn.trim(),
-            printed_qty,
+            serial_no: serialNos[i].trim(),
+            printed_qty: parseFloat(printQuantities[i]),
             print_by,
           });
 

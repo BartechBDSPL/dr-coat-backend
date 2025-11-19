@@ -15,16 +15,17 @@ export const getPendingStockTransferOrders = async (req, res) => {
 };
 
 export const getStockTransferOrderDetails = async (req, res) => {
-  const { stock_transfer_number, item_code, line_no, picked_status } = req.body;
+  const { stock_transfer_number, item_code, line_no, picked_status, user_name } = req.body;
 
   try {
     const result = await executeQuery(
-      `EXEC [dbo].[hht_stock_transfer_order_details] @stock_transfer_number, @item_code, @line_no, @picked_status`,
+      `EXEC [dbo].[hht_stock_transfer_order_details] @stock_transfer_number, @item_code, @line_no, @picked_status, @user_name`,
       [
         { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_number },
         { name: 'item_code', type: sql.NVarChar(50), value: item_code },
         { name: 'line_no', type: sql.NVarChar(10), value: line_no },
         { name: 'picked_status', type: sql.NVarChar(10), value: picked_status },
+        { name: 'user_name', type: sql.NVarChar(50), value: user_name },
       ]
     );
     res.json(result);

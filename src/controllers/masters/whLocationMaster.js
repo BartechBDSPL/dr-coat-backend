@@ -24,17 +24,17 @@ export const getAllWhCode = async (req, res) => {
 };
 
 export const insertDetails = async (req, res) => {
-  const { WarehouseCode, LocationNameSap, Bin, User, WStatus } = req.body;
+  const { warehouse_code, rack, bin, user, location_status } = req.body;
 
   try {
     const result = await executeQuery(
-      'EXEC sp_warehouse_location_insert @warehouse_code, @bin, @created_by, @location_name_erp, @location_status',
+      'EXEC sp_warehouse_location_insert @warehouse_code, @bin, @created_by, @rack, @location_status',
       [
-        { name: 'warehouse_code', type: sql.NVarChar, value: WarehouseCode },
-        { name: 'bin', type: sql.NVarChar, value: Bin },
-        { name: 'created_by', type: sql.NVarChar, value: User },
-        { name: 'location_name_erp', type: sql.NVarChar, value: LocationNameSap },
-        { name: 'location_status', type: sql.NVarChar, value: WStatus },
+        { name: 'warehouse_code', type: sql.NVarChar, value: warehouse_code },
+        { name: 'bin', type: sql.NVarChar, value: bin },
+        { name: 'created_by', type: sql.NVarChar, value: user },
+        { name: 'rack', type: sql.NVarChar, value: rack },
+        { name: 'location_status', type: sql.NVarChar, value: location_status },
       ]
     );
 
@@ -46,17 +46,17 @@ export const insertDetails = async (req, res) => {
 };
 
 export const updateDetails = async (req, res) => {
-  const { Id, WarehouseCode, Bin, LocationNameSap, User, Status } = req.body;
+  const { id, warehouse_code, bin, rack, user, location_status } = req.body;
   try {
     const result = await executeQuery(
-      'EXEC sp_warehouse_location_update @id, @warehouse_code, @bin, @location_name_erp, @location_status, @updated_by',
+      'EXEC sp_warehouse_location_update @id, @warehouse_code, @bin, @rack, @location_status, @updated_by',
       [
-        { name: 'id', type: sql.Int, value: Id },
-        { name: 'warehouse_code', type: sql.NVarChar, value: WarehouseCode },
-        { name: 'bin', type: sql.NVarChar, value: Bin },
-        { name: 'location_name_erp', type: sql.NVarChar, value: LocationNameSap },
-        { name: 'location_status', type: sql.NVarChar, value: Status },
-        { name: 'updated_by', type: sql.NVarChar, value: User },
+        { name: 'id', type: sql.Int, value: id },
+        { name: 'warehouse_code', type: sql.NVarChar, value: warehouse_code },
+        { name: 'bin', type: sql.NVarChar, value: bin },
+        { name: 'rack', type: sql.NVarChar, value: rack },
+        { name: 'location_status', type: sql.NVarChar, value: location_status },
+        { name: 'updated_by', type: sql.NVarChar, value: user },
       ]
     );
 
@@ -72,7 +72,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = 'uploads/';
     if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: 'T' });
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
     cb(null, uploadDir);
   },
@@ -86,9 +86,9 @@ const fileFilter = (req, file, cb) => {
   const allowedFileTypes = ['.xlsx', '.xls'];
   const extname = path.extname(file.originalname).toLowerCase();
   if (allowedFileTypes.includes(extname)) {
-    cb(null, 'T');
+    cb(null, true);
   } else {
-    cb(new Error('Only Excel files are allowed!'), 'F');
+    cb(new Error('Only Excel files are allowed!'), false);
   }
 };
 
@@ -97,10 +97,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-}).fields([
-  { name: 'excelFile', maxCount: 1 },
-  { name: 'username', maxCount: 1 },
-]);
+}).single('excelFile');
 
 // Function to upload and process Excel file
 export const uploadWhLocationExcel = async (req, res) => {
@@ -128,9 +125,9 @@ export const uploadWhLocationExcel = async (req, res) => {
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const data = xlsx.utils.sheet_to_json(worksheet);
+        const rawData = xlsx.utils.sheet_to_json(worksheet, { defval: '' });
 
-        if (data.length === 0) {
+        if (rawData.length === 0) {
           // Delete the file after processing
           fs.unlinkSync(filePath);
           return res.status(400).json({
@@ -139,17 +136,30 @@ export const uploadWhLocationExcel = async (req, res) => {
           });
         }
 
+        // Normalize data by trimming header names and filtering out empty columns
+        const data = rawData.map(row => {
+          const normalizedRow = {};
+          Object.keys(row).forEach(key => {
+            const normalizedKey = key.trim();
+            // Skip empty column headers or system-generated headers
+            if (normalizedKey && !normalizedKey.startsWith('__EMPTY')) {
+              normalizedRow[normalizedKey] = row[key];
+            }
+          });
+          return normalizedRow;
+        });
+
         // Check if required headers exist
         const requiredHeaders = [
-          'Storage Type (Bartech)',
-          'Storage Type (SAP)',
-          'Storage Bin (SAP & Bartech)',
-          'Bin Status (SAP)',
+          'warehouse_code',
+          'rack',
+          'bin',
+          'location_status',
         ];
 
         const fileHeaders = Object.keys(data[0]);
         const missingHeaders = requiredHeaders.filter(header => !fileHeaders.includes(header));
-
+        
         if (missingHeaders.length > 0) {
           // Delete the file after processing
           fs.unlinkSync(filePath);
@@ -184,29 +194,46 @@ export const uploadWhLocationExcel = async (req, res) => {
           // Process all rows in the chunk concurrently
           const chunkPromises = chunk.map(async row => {
             try {
-              const warehouseCode = row['Storage Type (Bartech)'];
-              const locationNameSAP = row['Storage Type (SAP)'];
-              const bin = row['Storage Bin (SAP & Bartech)'];
-              const status = row['Bin Status (SAP)'];
+              const warehouseCode = (row['warehouse_code'] || '').toString().trim();
+              const locationNameSAP = (row['rack'] || '').toString().trim();
+              const bin = (row['bin'] || '').toString().trim();
+              const status = (row['location_status'] || '').toString().trim();
 
-              const result = await executeQuery(
-                'EXEC sp_warehouse_location_master_upsert_details @warehouse_code, @bin, @updated_by, @location_name_erp, @location_status',
+                console.log('Params:', [
+                {
+                  name: 'warehouse_code',
+                  type: sql.NVarChar,
+                  value: warehouseCode,
+                },
+                { name: 'bin', type: sql.NVarChar, value: bin },
+                { name: 'updated_by', type: sql.NVarChar, value: username },
+                {
+                  name: 'rack',
+                  type: sql.NVarChar,
+                  value: locationNameSAP,
+                },
+                { name: 'location_status', type: sql.NVarChar, value: status },
+                ]);
+
+                const result = await executeQuery(
+                'EXEC sp_warehouse_location_master_upsert_details @warehouse_code, @bin, @updated_by, @rack, @location_status',
                 [
                   {
-                    name: 'warehouse_code',
-                    type: sql.NVarChar,
-                    value: warehouseCode,
+                  name: 'warehouse_code',
+                  type: sql.NVarChar,
+                  value: warehouseCode,
                   },
-                  { name: 'bin', type: sql.NVarChar, value: bin },
+                  { name: 'bin', type: sql.NVarChar, value: bin },  
                   { name: 'updated_by', type: sql.NVarChar, value: username },
                   {
-                    name: 'location_name_erp',
-                    type: sql.NVarChar,
-                    value: locationNameSAP,
+                  name: 'rack',
+                  type: sql.NVarChar,
+                  value: locationNameSAP,
                   },
                   { name: 'location_status', type: sql.NVarChar, value: status },
                 ]
-              );
+                );
+
 
               const spResult = result[0];
 
