@@ -82,6 +82,7 @@ export default {
       patterns: [
         { from: '.env', to: '.env', noErrorOnMissing: true },
         { from: 'images', to: 'images', noErrorOnMissing: true },
+        { from: 'src/prn-printer', to: 'prn-printer', noErrorOnMissing: false },
       ],
     }),
   ],
