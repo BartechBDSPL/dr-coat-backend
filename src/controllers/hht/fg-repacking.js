@@ -70,6 +70,24 @@ function preparePrnFileRepacking(data, labelFile) {
   }
 }
 
+// Function to find SR number for repacking
+async function findSrNoForRepacking(production_order_no, item_code, lot_no) {
+  try {
+    const result = await executeQuery(
+      `EXEC [dbo].[sp_fg_label_sr_no_find_sr_no] @production_order_no, @item_code, @lot_no`,
+      [
+        { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no },
+        { name: 'item_code', type: sql.NVarChar(50), value: item_code },
+        { name: 'lot_no', type: sql.NVarChar(50), value: lot_no },
+      ]
+    );
+    return result[0]?.sr_no || 0;
+  } catch (error) {
+    console.error('Error finding SR number:', error);
+    throw error;
+  }
+}
+
 // Function to prepare label data for DRCoatLabel_300.prn
 function prepareFGLabelDataForCoatRepacking(reqData) {
   // Split item_description into two parts if needed
@@ -145,91 +163,86 @@ export const validateRepacking = async (req, res) => {
 
   try {
     if (!serial_no) {
-      return res.status(400).json({ 
-        Status: 'F', 
-        Message: 'Serial number is required' 
+      return res.status(400).json({
+        Status: 'F',
+        Message: 'Serial number is required',
       });
     }
 
-    const result = await executeQuery(
-      `EXEC [dbo].[hht_item_repacking_validation] @serial_no`,
-      [
-        { name: 'serial_no', type: sql.NVarChar(255), value: serial_no },
-      ]
-    );
+    const result = await executeQuery(`EXEC [dbo].[hht_item_repacking_validation] @serial_no`, [
+      { name: 'serial_no', type: sql.NVarChar(255), value: serial_no },
+    ]);
 
     if (result && result.length > 0) {
       res.json(result);
     } else {
-      res.status(500).json({ 
-        Status: 'F', 
-        Message: 'No response from validation procedure' 
+      res.status(500).json({
+        Status: 'F',
+        Message: 'No response from validation procedure',
       });
     }
   } catch (error) {
     console.error('Error in repacking validation:', error);
-    res.status(500).json({ 
-      Status: 'F', 
-      Message: `Failed to validate repacking: ${error.message}` 
+    res.status(500).json({
+      Status: 'F',
+      Message: `Failed to validate repacking: ${error.message}`,
     });
   }
 };
 
 export const updateRepacking = async (req, res) => {
   console.log('Starting repacking update process');
-  const { 
-    serial_no, 
-    quantity, 
-    repacking_by, 
-    printer_ip,
-    production_order_no,
-    item_code,
-    item_description,
-    lot_no,
-  } = req.body;
+  const { serial_no, quantity, repacking_by, printer_ip, production_order_no, item_code, item_description, lot_no } =
+    req.body;
 
   console.log('Received request body:', {
     serial_no,
     quantity,
     repacking_by,
-    printer_ip
+    printer_ip,
   });
 
   try {
     // Validate input
     if (!serial_no || !quantity || !repacking_by) {
       console.error('Validation failed: Missing required fields');
-      return res.status(400).json({ 
-        Status: 'F', 
-        Message: 'Missing required fields: serial_no, quantity, and repacking_by are required' 
+      return res.status(400).json({
+        Status: 'F',
+        Message: 'Missing required fields: serial_no, quantity, and repacking_by are required',
       });
     }
 
     const numberResult = await executeQuery(`EXEC hht_repacking_get_number`, []);
-    
+
     if (!numberResult || !numberResult[0] || numberResult[0].number === undefined) {
-      return res.status(500).json({ 
-        Status: 'F', 
-        Message: 'Failed to get repacking number' 
+      return res.status(500).json({
+        Status: 'F',
+        Message: 'Failed to get repacking number',
       });
     }
 
     const repackingNumber = numberResult[0].number;
 
-    const serialNos = serial_no.split('$').map(s => s.trim()).filter(s => s);
-    const quantities = quantity.split('$').map(q => q.trim()).filter(q => q);
+    const serialNos = serial_no
+      .split('$')
+      .map(s => s.trim())
+      .filter(s => s);
+    const quantities = quantity
+      .split('$')
+      .map(q => q.trim())
+      .filter(q => q);
 
     if (serialNos.length !== quantities.length) {
-      return res.status(400).json({ 
-        Status: 'F', 
-        Message: 'Number of serial numbers and quantities do not match' 
+      return res.status(400).json({
+        Status: 'F',
+        Message: 'Number of serial numbers and quantities do not match',
       });
     }
 
     if (serialNos.length === 0) {
-         return res.status(400).json({ 
-        Status: 'F', 
-        Message: 'No serial numbers provided' 
+      return res.status(400).json({
+        Status: 'F',
+        Message: 'No serial numbers provided',
       });
     }
 
@@ -247,23 +260,22 @@ export const updateRepacking = async (req, res) => {
       const currentQuantity = parseFloat(quantities[i]);
 
       if (isNaN(currentQuantity) || currentQuantity <= 0) {
-        return res.status(400).json({ 
-          Status: 'F', 
-          Message: `Invalid quantity '${quantities[i]}' for serial number '${currentSerial}'` 
+        return res.status(400).json({
+          Status: 'F',
+          Message: `Invalid quantity '${quantities[i]}' for serial number '${currentSerial}'`,
         });
       }
 
-      
       const result = await executeQuery(
         `EXEC hht_item_repacking_update @number, @serial_no, @quantity, @repacking_by`,
         [
           { name: 'number', type: sql.Int, value: repackingNumber },
           { name: 'serial_no', type: sql.NVarChar(255), value: currentSerial },
-          { name: 'quantity', type: sql.Decimal(18,3), value: currentQuantity },
+          { name: 'quantity', type: sql.Decimal(18, 3), value: currentQuantity },
           { name: 'repacking_by', type: sql.NVarChar(50), value: repacking_by },
         ]
       );
-      
+
       results.push(result[0]);
 
       if (result[0] && result[0].Status === 'F') {
@@ -271,7 +283,7 @@ export const updateRepacking = async (req, res) => {
         lastMessage = result[0].Message;
         return res.json({
           Status: 'F',
-          Message: `Failed at serial '${currentSerial}': ${lastMessage}`
+          Message: `Failed at serial '${currentSerial}': ${lastMessage}`,
         });
       }
     }
@@ -282,79 +294,137 @@ export const updateRepacking = async (req, res) => {
       console.log('Repacking number update result:', updateNumberResult[0]);
     }
 
-    if (printer_ip && allSuccess) {
+    if (allSuccess) {
       try {
-        const [printerIP, printerPort] = printer_ip.split(':');
+        // Find the current serial number
+        const currentSrNo = await findSrNoForRepacking('', item_code || '', lot_no || '');
+        const newSrNo = currentSrNo + 1;
 
-        const persistentFilePath = path.join(__dirname, 'fg_repacking_label_print.prn');
+        // Generate the new serial number in format: item_code|lot_no|sr_no
+        const repackedSerialNo = `${item_code || ''}|${lot_no || ''}|${newSrNo}`;
 
-        const repackedSerialNo = `REPK-${repackingNumber}`;
+        console.log('Generated serial number:', repackedSerialNo);
 
-        const prnData = prepareFGLabelDataForCoatRepacking({
-          production_order_no: '',
-          item_code: item_code || '',
-          item_description: item_description || '',
-          lot_no: lot_no || '',
-          quantity: totalQuantity,
-          serial_no: repackedSerialNo,
-          printed_qty: totalQuantity,
-          print_by: repacking_by,
-        });
+        const insertResult = await executeQuery(
+          `EXEC [dbo].[hht_item_repacking_fg_label_insert] @item_code, @lot_no, @serial_no, @print_quantity, @print_by`,
+          [
+            { name: 'item_code', type: sql.NVarChar(50), value: item_code || '' },
+            { name: 'lot_no', type: sql.NVarChar(50), value: lot_no || '' },
+            { name: 'serial_no', type: sql.NVarChar(255), value: repackedSerialNo },
+            { name: 'print_quantity', type: sql.Decimal(18, 3), value: totalQuantity },
+            { name: 'print_by', type: sql.NVarChar(50), value: repacking_by },
+          ]
+        );
 
-        const prnContent = preparePrnFileRepacking(prnData, 'DRCoatLabel_300.prn');
-        if (!prnContent) {
-          throw new Error('Failed to prepare PRN content');
+        await executeQuery(
+          `EXEC [dbo].[sp_production_order_label_count_update] @production_order_no, @item_code, @lot_no`,
+          [
+            { name: 'production_order_no', type: sql.NVarChar(50), value: '' },
+            { name: 'item_code', type: sql.NVarChar(50), value: item_code || '' },
+            { name: 'lot_no', type: sql.NVarChar(50), value: lot_no || '' },
+          ]
+        );
+
+        if (insertResult[0]?.Status === 'F') {
+          return res.json({
+            Status: 'F',
+            Message: insertResult[0].Message || 'Failed to insert label record',
+          });
         }
 
-        fs.writeFileSync(persistentFilePath, prnContent);
+        console.log('Label record inserted successfully');
 
-        console.log('Print data for repacking label:', {
-          production_order_no,
-          item_description,
-          lot_no,
-          item_code,
-          quantity: totalQuantity,
-          serial_no: repackedSerialNo,
-          printed_qty: totalQuantity,
-          print_by: repacking_by,
-        });
+        // If printer_ip is provided, proceed with printing
+        if (printer_ip) {
+          try {
+            const [printerIP, printerPort] = printer_ip.split(':');
 
-        // Send to printer
-        await batchPrintToTscPrinterRepacking({ tempFilePath: persistentFilePath }, printerIP, printerPort || '9100');
+            const persistentFilePath = path.join(__dirname, 'fg_repacking_label_print.prn');
 
-        res.json({
-          Status: 'T',
-          Message: `Repacking done successfully for ${serialNos.length} item(s). Label printed with total quantity: ${totalQuantity}`,
+            const prnData = prepareFGLabelDataForCoatRepacking({
+              production_order_no: '',
+              item_code: item_code || '',
+              item_description: item_description || '',
+              lot_no: lot_no || '',
+              quantity: totalQuantity,
+              serial_no: repackedSerialNo,
+              printed_qty: totalQuantity,
+              print_by: repacking_by,
+            });
 
-        });
-      } catch (printError) {
-        console.error('Printing error:', printError);
-        const errorMessage =
-          printError.message === 'Printer not found'
-            ? `Repacking done successfully for ${serialNos.length} item(s) but cannot find printer`
-            : `Repacking done successfully for ${serialNos.length} item(s) but printing failed: ${printError.message}`;
-        res.json({
-          Status: 'T',
-          Message: errorMessage,
-          printed: false,
-          total_quantity: totalQuantity
+            const prnContent = preparePrnFileRepacking(prnData, 'DRCoatLabel_300.prn');
+            if (!prnContent) {
+              throw new Error('Failed to prepare PRN content');
+            }
+
+            fs.writeFileSync(persistentFilePath, prnContent);
+
+            console.log('Print data for repacking label:', {
+              production_order_no: '',
+              item_description,
+              lot_no,
+              item_code,
+              quantity: totalQuantity,
+              serial_no: repackedSerialNo,
+              printed_qty: totalQuantity,
+              print_by: repacking_by,
+            });
+
+            // Send to printer
+            await batchPrintToTscPrinterRepacking(
+              { tempFilePath: persistentFilePath },
+              printerIP,
+              printerPort || '9100'
+            );
+
+            res.json({
+              Status: 'T',
+              Message: `Repacking done successfully for ${serialNos.length} item(s). Label printed with serial: ${repackedSerialNo}`,
+              serial_no: repackedSerialNo,
+              total_quantity: totalQuantity,
+            });
+          } catch (printError) {
+            console.error('Printing error:', printError);
+            const errorMessage =
+              printError.message === 'Printer not found'
+                ? `Repacking done successfully for ${serialNos.length} item(s) but cannot find printer. Serial: ${repackedSerialNo}`
+                : `Repacking done successfully for ${serialNos.length} item(s) but printing failed: ${printError.message}. Serial: ${repackedSerialNo}`;
+            res.json({
+              Status: 'T',
+              Message: errorMessage,
+              printed: false,
+              serial_no: repackedSerialNo,
+              total_quantity: totalQuantity,
+            });
+          }
+        } else {
+          res.json({
+            Status: 'T',
+            Message: `Repacking done successfully for ${serialNos.length} item(s). Serial: ${repackedSerialNo}`,
+            printed: false,
+            serial_no: repackedSerialNo,
+            total_quantity: totalQuantity,
+          });
+        }
+      } catch (error) {
+        console.error('Error in serial number generation or label insertion:', error);
+        res.status(500).json({
+          Status: 'F',
+          Message: `Repacking successful but label generation failed: ${error.message}`,
         });
       }
     } else {
-      console.log('Repacking process completed successfully');
+      console.log('Repacking process completed with errors');
       res.json({
-        Status: 'T',
-        Message: `Repacking done successfully for ${serialNos.length} item(s)`,
-        printed: false,
-        total_quantity: totalQuantity
+        Status: 'F',
+        Message: lastMessage || 'Repacking process failed',
       });
     }
-
   } catch (error) {
     console.error('Error in repacking update:', error);
-    res.status(500).json({ 
-      Status: 'F', 
-      Message: `Failed to update repacking: ${error.message}` 
+    res.status(500).json({
+      Status: 'F',
+      Message: `Failed to update repacking: ${error.message}`,
     });
   }
 };

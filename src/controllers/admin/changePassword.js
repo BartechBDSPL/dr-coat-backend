@@ -1,5 +1,5 @@
-import { executeQuery,sql } from "../../config/db.js";
-import { encryptPassword } from "../../utils/passswordHelper.js";
+import { executeQuery, sql } from '../../config/db.js';
+import { encryptPassword } from '../../utils/passswordHelper.js';
 
 export const changePassword = async (req, res) => {
   const { user_id, old_user_password, new_user_password, is_first_change } = req.body;
@@ -12,7 +12,7 @@ export const changePassword = async (req, res) => {
           name: 'old_user_password',
           type: sql.NVarChar(100),
           value: encryptPassword(old_user_password.toString()),
-        },  
+        },
         {
           name: 'new_user_password',
           type: sql.NVarChar(100),
@@ -30,4 +30,3 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-

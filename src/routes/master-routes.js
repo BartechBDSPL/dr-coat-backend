@@ -97,6 +97,10 @@ router.post('/existing-data/get-lot-numbers', authWithSession, ExistingDataUploa
 router.post('/existing-data/get-details', authWithSession, ExistingDataUploadController.getDetails);
 router.post('/existing-data/upsert-serial-number', authWithSession, ExistingDataUploadController.upsertSerialNumber);
 router.post('/existing-data/find-serial-number', authWithSession, ExistingDataUploadController.findSerialNumber);
-router.post('/existing-data/insert-label-printing', authWithSession, ExistingDataUploadController.insertExistingDataLabelPrinting);
+router.post(
+  '/existing-data/insert-label-printing',
+  authWithSession,
+  ExistingDataUploadController.insertExistingDataLabelPrinting
+);
 
 export default router;

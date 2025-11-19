@@ -143,12 +143,9 @@ async function batchPrintToTscPrinterSplit(printJobs, printerIP, printerPort) {
 export const validateItemSplit = async (req, res) => {
   const { serial_no } = req.body;
   try {
-    const result = await executeQuery(
-      `EXEC hht_item_split_validation @serial_no`,
-      [
-        { name: 'serial_no', type: sql.NVarChar(255), value: serial_no || null },
-      ]
-    );
+    const result = await executeQuery(`EXEC hht_item_split_validation @serial_no`, [
+      { name: 'serial_no', type: sql.NVarChar(255), value: serial_no || null },
+    ]);
     res.json(result);
   } catch (error) {
     console.error('Error validating item split:', error);
@@ -173,7 +170,7 @@ export const updateItemSplit = async (req, res) => {
     warehouse_code,
     put_location,
     put_quantity,
-    printer_ip
+    printer_ip,
   } = req.body;
 
   console.log('Received request body:', {
@@ -184,7 +181,7 @@ export const updateItemSplit = async (req, res) => {
     production_order_no,
     item_code,
     lot_no,
-    printer_ip
+    printer_ip,
   });
 
   try {
@@ -198,9 +195,9 @@ export const updateItemSplit = async (req, res) => {
     // Validate that arrays have the same length
     if (newSerialNos.length !== splitQuantities.length) {
       console.error('Validation failed: Number of serial numbers and quantities do not match');
-      return res.status(400).json({ 
+      return res.status(400).json({
         Status: 'F',
-        Message: 'Number of serial numbers and quantities do not match'
+        Message: 'Number of serial numbers and quantities do not match',
       });
     }
 
@@ -210,28 +207,30 @@ export const updateItemSplit = async (req, res) => {
 
     // Loop through each split and call the SP
     for (let i = 0; i < newSerialNos.length; i++) {
-      console.log(`Processing split ${i + 1}/${newSerialNos.length}: Serial=${newSerialNos[i].trim()}, Quantity=${splitQuantities[i].trim()}`);
-      
+      console.log(
+        `Processing split ${i + 1}/${newSerialNos.length}: Serial=${newSerialNos[i].trim()}, Quantity=${splitQuantities[i].trim()}`
+      );
+
       const result = await executeQuery(
         `EXEC hht_item_split_update @old_serial_no, @new_serial_no, @split_quantity, @split_by, @production_order_no, @item_code, @item_description, @lot_no, @finished_quantity, @uom, @quantity, @warehouse_code, @put_location, @put_quantity`,
         [
           { name: 'old_serial_no', type: sql.NVarChar(255), value: old_serial_no || '' },
           { name: 'new_serial_no', type: sql.NVarChar(255), value: newSerialNos[i].trim() || '' },
-          { name: 'split_quantity', type: sql.Decimal(18,3), value: parseFloat(splitQuantities[i].trim()) || 0 },
+          { name: 'split_quantity', type: sql.Decimal(18, 3), value: parseFloat(splitQuantities[i].trim()) || 0 },
           { name: 'split_by', type: sql.NVarChar(50), value: split_by || '' },
           { name: 'production_order_no', type: sql.NVarChar(50), value: production_order_no || '' },
           { name: 'item_code', type: sql.NVarChar(50), value: item_code || '' },
           { name: 'item_description', type: sql.NVarChar(200), value: item_description || '' },
           { name: 'lot_no', type: sql.NVarChar(50), value: lot_no || '' },
-          { name: 'finished_quantity', type: sql.Decimal(18,3), value: finished_quantity || 0 },
+          { name: 'finished_quantity', type: sql.Decimal(18, 3), value: finished_quantity || 0 },
           { name: 'uom', type: sql.NVarChar(10), value: uom || '' },
-          { name: 'quantity', type: sql.Decimal(18,3), value: quantity || 0 },
+          { name: 'quantity', type: sql.Decimal(18, 3), value: quantity || 0 },
           { name: 'warehouse_code', type: sql.NVarChar(50), value: warehouse_code || '' },
           { name: 'put_location', type: sql.NVarChar(50), value: put_location || '' },
-          { name: 'put_quantity', type: sql.Decimal(18,3), value: put_quantity || 0 },
+          { name: 'put_quantity', type: sql.Decimal(18, 3), value: put_quantity || 0 },
         ]
       );
-      
+
       console.log(`Split ${i + 1} result:`, result[0]);
       results.push(result[0]);
 
@@ -240,7 +239,7 @@ export const updateItemSplit = async (req, res) => {
         allSuccess = false;
         return res.json({
           Status: 'F',
-          Message: result[0].Message || `Failed at serial '${newSerialNos[i].trim()}'`
+          Message: result[0].Message || `Failed at serial '${newSerialNos[i].trim()}'`,
         });
       }
     }
@@ -283,7 +282,7 @@ export const updateItemSplit = async (req, res) => {
           item_code,
           new_serial_numbers: newSerialNos,
           split_quantities: splitQuantities,
-          split_by
+          split_by,
         });
 
         // Send to printer
@@ -294,7 +293,7 @@ export const updateItemSplit = async (req, res) => {
           Status: 'T',
           Message: `Item split completed successfully for ${newSerialNos.length} item(s). Labels printed.`,
           printed: true,
-          labels_count: newSerialNos.length
+          labels_count: newSerialNos.length,
         });
       } catch (printError) {
         console.error('Printing error:', printError);
@@ -305,7 +304,7 @@ export const updateItemSplit = async (req, res) => {
         res.json({
           Status: 'T',
           Message: errorMessage,
-          printed: false
+          printed: false,
         });
       }
     } else {
@@ -313,14 +312,14 @@ export const updateItemSplit = async (req, res) => {
       res.json({
         Status: 'T',
         Message: `Item split completed successfully for ${newSerialNos.length} item(s)`,
-        printed: false
+        printed: false,
       });
     }
   } catch (error) {
     console.error('Error updating item split:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       Status: 'F',
-      Message: `Failed to update item split: ${error.message}` 
+      Message: `Failed to update item split: ${error.message}`,
     });
   }
 };

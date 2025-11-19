@@ -72,7 +72,6 @@ function preparePrnFile(data, labelFile) {
   }
 }
 
-// Function to prepare label data for DRCoatLabel_300.prn
 function prepareFGLabelDataForCoat(reqData) {
   // Split item_description into two parts if needed
   const description = reqData.item_description || '';

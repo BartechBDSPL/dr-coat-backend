@@ -77,14 +77,7 @@ export const uploadExistingData = async (req, res) => {
         }
 
         // Check if required headers exist
-        const requiredHeaders = [
-          'item_code',
-          'item_description',
-          'lot_no',
-          'mfg_date',
-          'exp_date',
-          'quantity',
-        ];
+        const requiredHeaders = ['item_code', 'item_description', 'lot_no', 'mfg_date', 'exp_date', 'quantity'];
 
         const fileHeaders = Object.keys(data[0]);
         const missingHeaders = requiredHeaders.filter(header => !fileHeaders.includes(header));
@@ -277,13 +270,10 @@ export const getDetails = async (req, res) => {
       });
     }
 
-    const result = await executeQuery(
-      'EXEC sp_existing_data_upload_get_details @item_code, @lot_no',
-      [
-        { name: 'item_code', type: sql.NVarChar, value: item_code },
-        { name: 'lot_no', type: sql.NVarChar, value: lot_no },
-      ]
-    );
+    const result = await executeQuery('EXEC sp_existing_data_upload_get_details @item_code, @lot_no', [
+      { name: 'item_code', type: sql.NVarChar, value: item_code },
+      { name: 'lot_no', type: sql.NVarChar, value: lot_no },
+    ]);
 
     if (result && result.length > 0) {
       return res.status(200).json({
@@ -360,13 +350,10 @@ export const findSerialNumber = async (req, res) => {
       });
     }
 
-    const result = await executeQuery(
-      'EXEC sp_existing_data_upload_sr_no_find_sr_no @item_code, @lot_no',
-      [
-        { name: 'item_code', type: sql.NVarChar, value: item_code },
-        { name: 'lot_no', type: sql.NVarChar, value: lot_no },
-      ]
-    );
+    const result = await executeQuery('EXEC sp_existing_data_upload_sr_no_find_sr_no @item_code, @lot_no', [
+      { name: 'item_code', type: sql.NVarChar, value: item_code },
+      { name: 'lot_no', type: sql.NVarChar, value: lot_no },
+    ]);
 
     if (result && result.length > 0) {
       return res.status(200).json({
@@ -529,7 +516,7 @@ export const insertExistingDataLabelPrinting = async (req, res) => {
     put_location,
     print_by,
     printer_ip,
-    dpi
+    dpi,
   } = req.body;
 
   try {
@@ -544,80 +531,76 @@ export const insertExistingDataLabelPrinting = async (req, res) => {
     const printJobs = [];
 
     for (let i = 0; i < serialNos.length; i++) {
-        // Insert into DB
-        const result = await executeQuery(
-            'EXEC sp_existing_data_upload_fg_label_printing_insert @item_code, @item_description, @lot_no, @quantity, @serial_no, @print_quantity, @mfg_date, @exp_date, @warehouse_code, @put_location, @print_by',
-            [
-                { name: 'item_code', type: sql.NVarChar, value: item_code },
-                { name: 'item_description', type: sql.NVarChar, value: item_description },
-                { name: 'lot_no', type: sql.NVarChar, value: lot_no },
-                { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
-                { name: 'serial_no', type: sql.NVarChar, value: serialNos[i] },
-                { name: 'print_quantity', type: sql.Decimal(18, 3), value: printQuantities[i] },
-                { name: 'mfg_date', type: sql.DateTime, value: mfg_date },
-                { name: 'exp_date', type: sql.DateTime, value: exp_date },
-                { name: 'warehouse_code', type: sql.NVarChar, value: warehouse_code || '' },
-                { name: 'put_location', type: sql.NVarChar, value: put_location || '' },
-                { name: 'print_by', type: sql.NVarChar, value: print_by }
-            ]
-        );
-        
-        if (result && result.length > 0) {
-             results.push(result[0]);
-        }
+      // Insert into DB
+      const result = await executeQuery(
+        'EXEC sp_existing_data_upload_fg_label_printing_insert @item_code, @item_description, @lot_no, @quantity, @serial_no, @print_quantity, @mfg_date, @exp_date, @warehouse_code, @put_location, @print_by',
+        [
+          { name: 'item_code', type: sql.NVarChar, value: item_code },
+          { name: 'item_description', type: sql.NVarChar, value: item_description },
+          { name: 'lot_no', type: sql.NVarChar, value: lot_no },
+          { name: 'quantity', type: sql.Decimal(18, 3), value: quantity },
+          { name: 'serial_no', type: sql.NVarChar, value: serialNos[i] },
+          { name: 'print_quantity', type: sql.Decimal(18, 3), value: printQuantities[i] },
+          { name: 'mfg_date', type: sql.DateTime, value: mfg_date },
+          { name: 'exp_date', type: sql.DateTime, value: exp_date },
+          { name: 'warehouse_code', type: sql.NVarChar, value: warehouse_code || '' },
+          { name: 'put_location', type: sql.NVarChar, value: put_location || '' },
+          { name: 'print_by', type: sql.NVarChar, value: print_by },
+        ]
+      );
 
-        // Prepare print job
-        if (printer_ip) {
-             const labelData = prepareFGLabelDataForCoat({
-                production_order_no: '',
-                item_code,
-                item_description,
-                lot_no,
-                quantity,
-                serial_no: serialNos[i],
-                printed_qty: printQuantities[i],
-                print_by
-             });
-             
-             const prnContent = preparePrnFile(labelData, 'DRCoatLabel_300.prn');
-             printJobs.push(prnContent);
-        }
+      if (result && result.length > 0) {
+        results.push(result[0]);
+      }
+
+      // Prepare print job
+      if (printer_ip) {
+        const labelData = prepareFGLabelDataForCoat({
+          production_order_no: '',
+          item_code,
+          item_description,
+          lot_no,
+          quantity,
+          serial_no: serialNos[i],
+          printed_qty: printQuantities[i],
+          print_by,
+        });
+
+        const prnContent = preparePrnFile(labelData, 'DRCoatLabel_300.prn');
+        printJobs.push(prnContent);
+      }
     }
 
     // Upsert SR No
-    await executeQuery(
-        'EXEC sp_existing_data_upload_sr_no_upsert @item_code, @lot_no, @generated_sr_no',
-        [
-            { name: 'item_code', type: sql.NVarChar, value: item_code },
-            { name: 'lot_no', type: sql.NVarChar, value: lot_no },
-            { name: 'generated_sr_no', type: sql.Int, value: serialNos.length }
-        ]
-    );
+    await executeQuery('EXEC sp_existing_data_upload_sr_no_upsert @item_code, @lot_no, @generated_sr_no', [
+      { name: 'item_code', type: sql.NVarChar, value: item_code },
+      { name: 'lot_no', type: sql.NVarChar, value: lot_no },
+      { name: 'generated_sr_no', type: sql.Int, value: serialNos.length },
+    ]);
 
     // Execute printing if needed
     if (printer_ip && printJobs.length > 0) {
-        try {
-            await batchPrintToTscPrinter(printJobs, printer_ip, 9100);
-             return res.status(200).json({
-                Status: 'T',
-                Message: 'Data saved and labels printed successfully',
-                results
-            });
-        } catch (err) {
-             return res.status(200).json({
-                Status: 'T',
-                Message: 'Data saved but printing failed: ' + err.message,
-                results
-            });
-        }
+      try {
+        await batchPrintToTscPrinter(printJobs, printer_ip, 9100);
+        return res.status(200).json({
+          Status: 'T',
+          Message: 'Data saved and labels printed successfully',
+          results,
+        });
+      } catch (err) {
+        return res.status(200).json({
+          Status: 'T',
+          Message: 'Data saved but printing failed: ' + err.message,
+          results,
+        });
+      }
     }
 
     return res.status(200).json({
-        Status: 'T',
-        Message: 'Data saved successfully',
-        results
+      Status: 'T',
+      Message: 'Data saved successfully',
+      results,
     });
-
   } catch (error) {
     return res.status(500).json({
       Status: 'F',

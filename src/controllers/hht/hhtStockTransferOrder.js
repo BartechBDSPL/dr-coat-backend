@@ -1,4 +1,6 @@
 import { executeQuery, sql } from '../../config/db.js';
+import axios from 'axios';
+import { ODATA_BASE_URL, ODATA_USERNAME, ODATA_PASSWORD } from '../../utils/constants.js';
 
 export const getPendingStockTransferOrders = async (req, res) => {
   const { user_name } = req.body;
@@ -16,7 +18,7 @@ export const getPendingStockTransferOrders = async (req, res) => {
 
 export const getStockTransferOrderDetails = async (req, res) => {
   const { stock_transfer_number, item_code, line_no, picked_status, user_name } = req.body;
-
+  console.log(req.body);
   try {
     const result = await executeQuery(
       `EXEC [dbo].[hht_stock_transfer_order_details] @stock_transfer_number, @item_code, @line_no, @picked_status, @user_name`,
@@ -125,6 +127,47 @@ export const manualCloseStockTransferOrder = async (req, res) => {
         { name: 'closed_by', type: sql.NVarChar(50), value: closed_by },
       ]
     );
+
+    // Call the picked details SP
+    const pickedDetails = await executeQuery(`EXEC [dbo].[hht_stock_transfer_picked_details] @stock_transfer_number`, [
+      { name: 'stock_transfer_number', type: sql.NVarChar(50), value: stock_transfer_no },
+    ]);
+
+    // Post to OData for each detail
+    const postUrl = `${ODATA_BASE_URL}/DR_UAT/ODataV4/Company('DRC UAT 05032024')/PostStockTransferItemTrackingWMS`;
+    for (const detail of pickedDetails) {
+      const body = {
+        Type: 'Transfer',
+        Stocktransfer_No: detail.stock_transfer_number,
+        Line_No: parseInt(detail.line_no),
+        Item_No: detail.item_code,
+        Quantity: detail.quantity,
+        Lot_No: detail.lot_no,
+        Lot_Quantity: detail.pick_quantity,
+        Post: true,
+      };
+
+      try {
+        const response = await axios.post(postUrl, body, {
+          auth: {
+            username: ODATA_USERNAME,
+            password: ODATA_PASSWORD,
+          },
+        });
+        console.log('Posted successfully:', response.data);
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.status === 400 &&
+          error.response.data.error &&
+          error.response.data.error.code === 'Internal_EntityWithSameKeyExists'
+        ) {
+          console.log('Record already exists, skipping:', detail);
+        } else {
+          console.error('Error posting:', error.response ? error.response.data : error.message);
+        }
+      }
+    }
 
     res.json(result[0]);
   } catch (error) {

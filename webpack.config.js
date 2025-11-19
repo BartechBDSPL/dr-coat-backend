@@ -31,6 +31,7 @@ export default {
   externals: [
     nodeExternals({
       importType: 'module',
+      allowlist: [], // Don't bundle any node_modules
     }),
   ],
   optimization: {

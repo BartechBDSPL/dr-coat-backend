@@ -159,7 +159,7 @@ export const uploadUomExcel = async (req, res) => {
         const requiredHeaders = ['Code', 'Description'];
         const fileHeaders = Object.keys(data[0]);
         const missingHeaders = requiredHeaders.filter(header => !fileHeaders.includes(header));
-        
+
         if (missingHeaders.length > 0) {
           // Delete the file after processing
           fs.unlinkSync(filePath);
@@ -197,7 +197,7 @@ export const uploadUomExcel = async (req, res) => {
               const uomCode = (row['Code'] || '').toString().trim();
               const description = (row['Description'] || '').toString().trim();
               const internationalStandardCode = (row['International Standard Code'] || '').toString().trim();
-              
+
               // Skip rows with empty code
               if (!uomCode) {
                 return {

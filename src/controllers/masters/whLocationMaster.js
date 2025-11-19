@@ -25,7 +25,7 @@ export const getAllWhCode = async (req, res) => {
 
 export const insertDetails = async (req, res) => {
   const { warehouse_code, rack, bin, user, location_status } = req.body;
-
+  console.log(req.body);
   try {
     const result = await executeQuery(
       'EXEC sp_warehouse_location_insert @warehouse_code, @bin, @created_by, @rack, @location_status',
@@ -150,16 +150,11 @@ export const uploadWhLocationExcel = async (req, res) => {
         });
 
         // Check if required headers exist
-        const requiredHeaders = [
-          'warehouse_code',
-          'rack',
-          'bin',
-          'location_status',
-        ];
+        const requiredHeaders = ['warehouse_code', 'rack', 'bin', 'location_status'];
 
         const fileHeaders = Object.keys(data[0]);
         const missingHeaders = requiredHeaders.filter(header => !fileHeaders.includes(header));
-        
+
         if (missingHeaders.length > 0) {
           // Delete the file after processing
           fs.unlinkSync(filePath);
@@ -199,7 +194,7 @@ export const uploadWhLocationExcel = async (req, res) => {
               const bin = (row['bin'] || '').toString().trim();
               const status = (row['location_status'] || '').toString().trim();
 
-                console.log('Params:', [
+              console.log('Params:', [
                 {
                   name: 'warehouse_code',
                   type: sql.NVarChar,
@@ -213,27 +208,26 @@ export const uploadWhLocationExcel = async (req, res) => {
                   value: locationNameSAP,
                 },
                 { name: 'location_status', type: sql.NVarChar, value: status },
-                ]);
+              ]);
 
-                const result = await executeQuery(
+              const result = await executeQuery(
                 'EXEC sp_warehouse_location_master_upsert_details @warehouse_code, @bin, @updated_by, @rack, @location_status',
                 [
                   {
-                  name: 'warehouse_code',
-                  type: sql.NVarChar,
-                  value: warehouseCode,
+                    name: 'warehouse_code',
+                    type: sql.NVarChar,
+                    value: warehouseCode,
                   },
-                  { name: 'bin', type: sql.NVarChar, value: bin },  
+                  { name: 'bin', type: sql.NVarChar, value: bin },
                   { name: 'updated_by', type: sql.NVarChar, value: username },
                   {
-                  name: 'rack',
-                  type: sql.NVarChar,
-                  value: locationNameSAP,
+                    name: 'rack',
+                    type: sql.NVarChar,
+                    value: locationNameSAP,
                   },
                   { name: 'location_status', type: sql.NVarChar, value: status },
                 ]
-                );
-
+              );
 
               const spResult = result[0];
 
